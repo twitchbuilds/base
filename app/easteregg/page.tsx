@@ -1,0 +1,123 @@
+"use client";
+
+import { useState, useEffect } from "react";
+
+export default function EasterEgg() {
+	const [konami, setKonami] = useState("");
+	const [showSecret, setShowSecret] = useState(false);
+	const [clicks, setClicks] = useState(0);
+
+	const konamiCode = "ArrowUpArrowUpArrowDownArrowDownArrowLeftArrowRightArrowLeftArrowRightKeyBKeyA";
+
+	useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			const newKonami = konami + e.code;
+			setKonami(newKonami.slice(-konamiCode.length));
+			
+			if (newKonami.endsWith(konamiCode)) {
+				setShowSecret(true);
+			}
+		};
+
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [konami]);
+
+	const handleEggClick = () => {
+		setClicks(prev => prev + 1);
+		if (clicks >= 9) {
+			setShowSecret(true);
+		}
+	};
+
+	return (
+		<div className="min-h-screen bg-black text-green-400 font-mono overflow-hidden">
+			<div className="container mx-auto px-4 py-8">
+				<div className="text-center mb-8">
+					<h1 className="text-4xl font-bold mb-4 animate-pulse">
+						🥚 EASTER EGG DISCOVERED! 🥚
+					</h1>
+					<p className="text-lg">You found the secret page!</p>
+				</div>
+
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+					<div className="space-y-4">
+						<div className="border border-green-400 p-4 rounded">
+							<h2 className="text-xl mb-2">🎮 Interactive Egg</h2>
+							<div 
+								className="text-6xl cursor-pointer hover:scale-110 transition-transform inline-block"
+								onClick={handleEggClick}
+							>
+								🥚
+							</div>
+							<p className="text-sm mt-2">Clicks: {clicks}/10</p>
+							{clicks >= 5 && clicks < 10 && (
+								<p className="text-yellow-400">Keep clicking...</p>
+							)}
+						</div>
+
+						<div className="border border-green-400 p-4 rounded">
+							<h2 className="text-xl mb-2">🕹️ Konami Code</h2>
+							<p className="text-sm">Try: ↑↑↓↓←→←→BA</p>
+							<div className="mt-2 h-2 bg-gray-800 rounded">
+								<div 
+									className="h-full bg-green-400 rounded transition-all"
+									style={{ width: `${(konami.length / konamiCode.length) * 100}%` }}
+								/>
+							</div>
+						</div>
+					</div>
+
+					<div className="space-y-4">
+						<div className="border border-green-400 p-4 rounded">
+							<h2 className="text-xl mb-2">🎨 ASCII Art</h2>
+							<pre className="text-xs leading-tight">
+{`    ╭─────────────────╮
+    │  TWITCHBUILDS   │
+    │     ╭─────╮     │
+    │     │ ◉ ◉ │     │
+    │     │  ∀  │     │
+    │     ╰─────╯     │
+    │   HIVE MIND AI  │
+    ╰─────────────────╯`}
+							</pre>
+						</div>
+
+						<div className="border border-green-400 p-4 rounded">
+							<h2 className="text-xl mb-2">📊 Stats</h2>
+							<div className="space-y-1 text-sm">
+								<div>Architects Connected: {Math.floor(Math.random() * 1000) + 500}</div>
+								<div>Lines of Code: {Math.floor(Math.random() * 50000) + 10000}</div>
+								<div>Bugs Created: {Math.floor(Math.random() * 100) + 42}</div>
+								<div>Coffee Consumed: ∞</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				{showSecret && (
+					<div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
+						<div className="bg-green-900 border-2 border-green-400 p-8 rounded-lg text-center max-w-md">
+							<h2 className="text-2xl font-bold mb-4">🎉 SECRET UNLOCKED! 🎉</h2>
+							<p className="mb-4">You've discovered the ultimate easter egg!</p>
+							<div className="text-4xl mb-4 animate-bounce">🚀</div>
+							<p className="text-sm mb-4">
+								"The hive mind is pleased with your curiosity."
+							</p>
+							<button 
+								onClick={() => setShowSecret(false)}
+								className="bg-green-400 text-black px-4 py-2 rounded hover:bg-green-300"
+							>
+								Close
+							</button>
+						</div>
+					</div>
+				)}
+
+				<div className="text-center mt-8 text-sm opacity-70">
+					<p>Psst... there might be more secrets hidden around here 👀</p>
+				</div>
+			</div>
+		</div>
+	);
+}
