@@ -35,8 +35,8 @@ export default function EasterEgg() {
 		const centerX = rect.left + rect.width / 2;
 		const centerY = rect.top + rect.height / 2;
 		
-		const newEggs = Array.from({ length: 8 }, (_, i) => {
-			const angle = (i / 8) * Math.PI * 2;
+		const newEggs = Array.from({ length: 20 }, (_, i) => {
+			const angle = (i / 20) * Math.PI * 2;
 			const speed = 3 + Math.random() * 2;
 			return {
 				id: Date.now() + i,
