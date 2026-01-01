@@ -44,12 +44,13 @@ export default function EasterEgg() {
 					<div className="space-y-4">
 						<div className="border border-green-400 p-4 rounded">
 							<h2 className="text-xl mb-2">🎮 Interactive Egg</h2>
-							<div 
-								className="text-6xl cursor-pointer hover:scale-110 transition-transform inline-block"
+							<button 
+								className="text-6xl hover:scale-110 transition-transform inline-block bg-transparent border-none cursor-pointer"
 								onClick={handleEggClick}
+								aria-label={`Click the egg. ${clicks} out of 10 clicks completed.`}
 							>
 								🥚
-							</div>
+							</button>
 							<p className="text-sm mt-2">Clicks: {clicks}/10</p>
 							{clicks >= 5 && clicks < 10 && (
 								<p className="text-yellow-400">Keep clicking...</p>
