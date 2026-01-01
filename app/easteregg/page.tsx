@@ -7,6 +7,7 @@ export default function EasterEgg() {
 	const [showSecret, setShowSecret] = useState(false);
 	const [clicks, setClicks] = useState(0);
 	const [burstEggs, setBurstEggs] = useState<Array<{id: number, x: number, y: number, vx: number, vy: number}>>([]);
+	const [showEggWall, setShowEggWall] = useState(false);
 
 	const konamiCode = "ArrowUpArrowUpArrowDownArrowDownArrowLeftArrowRightArrowLeftArrowRightKeyBKeyA";
 
@@ -28,6 +29,7 @@ export default function EasterEgg() {
 		setClicks(prev => prev + 1);
 		if (clicks >= 9) {
 			setShowSecret(true);
+			setShowEggWall(true);
 		}
 
 		// Create burst effect
@@ -56,8 +58,8 @@ export default function EasterEgg() {
 	};
 
 	return (
-		<div className="min-h-screen bg-black text-green-400 font-mono overflow-hidden">
-			<div className="container mx-auto px-4 py-8">
+		<div className="min-h-screen bg-black text-green-400 font-mono overflow-hidden relative">
+			<div className="container mx-auto px-4 py-8 relative z-10">
 				<div className="text-center mb-8">
 					<h1 className="text-4xl font-bold mb-4 animate-pulse">
 						🥚 EASTER EGG DISCOVERED! 🥚
@@ -144,6 +146,44 @@ export default function EasterEgg() {
 					<p>Psst... there might be more secrets hidden around here 👀</p>
 				</div>
 			</div>
+
+			{/* Egg Wall Background */}
+			{showEggWall && (
+				<div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+					<div className="egg-wall">
+						{Array.from({ length: 200 }, (_, i) => (
+							<span key={i} className="egg-item">🥚</span>
+						))}
+					</div>
+					<style jsx>{`
+						.egg-wall {
+							position: absolute;
+							top: -150vh;
+							left: 0;
+							right: 0;
+							height: 300vh;
+							display: flex;
+							flex-wrap: wrap;
+							justify-content: space-around;
+							align-content: flex-start;
+							animation: eggFall 20s linear infinite;
+						}
+						.egg-item {
+							font-size: 2rem;
+							margin: 0.5rem;
+							opacity: 0.7;
+						}
+						@keyframes eggFall {
+							0% {
+								transform: translateY(0);
+							}
+							100% {
+								transform: translateY(150vh);
+							}
+						}
+					`}</style>
+				</div>
+			)}
 
 			{/* Burst eggs */}
 			{burstEggs.map(egg => {
