@@ -1,0 +1,15 @@
+{
+  "status": "AI_CODING",
+  "currentPrompt": "change the text to say \"Hello Twitchbuilds!\"",
+  "currentModel": "anthropic/claude-sonnet-4",
+  "voteCount": 1,
+  "timeRemaining": 0,
+  "topPrompts": [
+    {
+      "prompt": "change the text to say \"Hello Twitchbuilds!\"",
+      "votes": 1,
+      "id": 1
+    }
+  ],
+  "lastUpdated": 1767305570971
+}
