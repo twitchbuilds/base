@@ -146,33 +146,38 @@ export default function EasterEgg() {
 			</div>
 
 			{/* Burst eggs */}
-			{burstEggs.map(egg => (
-				<div
-					key={egg.id}
-					className="fixed pointer-events-none text-2xl z-40"
-					style={{
-						left: egg.x,
-						top: egg.y,
-						transform: 'translate(-50%, -50%)',
-						animation: `eggBurst 2s ease-out forwards`
-					}}
-				>
-					🥚
-				</div>
-			))}
-
-			<style jsx>{`
-				@keyframes eggBurst {
-					0% {
-						transform: translate(-50%, -50%) scale(1) rotate(0deg);
-						opacity: 1;
-					}
-					100% {
-						transform: translate(-50%, -50%) translate(${Math.random() * 400 - 200}px, ${Math.random() * 400 - 200}px) scale(0.5) rotate(720deg);
-						opacity: 0;
-					}
-				}
-			`}</style>
+			{burstEggs.map(egg => {
+				const randomX = Math.random() * 400 - 200;
+				const randomY = Math.random() * 400 - 200;
+				const randomRotation = Math.random() * 720 + 360;
+				
+				return (
+					<div
+						key={egg.id}
+						className="fixed pointer-events-none text-2xl z-40"
+						style={{
+							left: egg.x,
+							top: egg.y,
+							transform: 'translate(-50%, -50%)',
+							animation: `eggBurst-${egg.id} 2s ease-out forwards`
+						}}
+					>
+						🥚
+						<style jsx>{`
+							@keyframes eggBurst-${egg.id} {
+								0% {
+									transform: translate(-50%, -50%) scale(1) rotate(0deg);
+									opacity: 1;
+								}
+								100% {
+									transform: translate(-50%, -50%) translate(${randomX}px, ${randomY}px) scale(0.5) rotate(${randomRotation}deg);
+									opacity: 0;
+								}
+							}
+						`}</style>
+					</div>
+				);
+			})}
 		</div>
 	);
 }

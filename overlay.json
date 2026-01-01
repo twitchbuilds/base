@@ -1,15 +1,15 @@
 {
   "status": "AI_CODING",
-  "currentPrompt": "only one egg appears when we click it?",
+  "currentPrompt": "whenever manage to click 10 times, change the background to be a wall of eggs, that slowly descends infinitely",
   "currentModel": "anthropic/claude-sonnet-4",
   "voteCount": 1,
   "timeRemaining": 0,
   "topPrompts": [
     {
-      "prompt": "only one egg appears when we click it?",
+      "prompt": "whenever manage to click 10 times, change the background to be a wall of eggs, that slowly descends infinitely",
       "votes": 1,
       "id": 1
     }
   ],
-  "lastUpdated": 1767307910338
+  "lastUpdated": 1767308822711
 }
