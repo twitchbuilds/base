@@ -6,6 +6,7 @@ export default function EasterEgg() {
 	const [konami, setKonami] = useState("");
 	const [showSecret, setShowSecret] = useState(false);
 	const [clicks, setClicks] = useState(0);
+	const [burstEggs, setBurstEggs] = useState<Array<{id: number, x: number, y: number, vx: number, vy: number}>>([]);
 
 	const konamiCode = "ArrowUpArrowUpArrowDownArrowDownArrowLeftArrowRightArrowLeftArrowRightKeyBKeyA";
 
@@ -23,11 +24,35 @@ export default function EasterEgg() {
 		return () => window.removeEventListener("keydown", handleKeyDown);
 	}, [konami]);
 
-	const handleEggClick = () => {
+	const handleEggClick = (e: React.MouseEvent) => {
 		setClicks(prev => prev + 1);
 		if (clicks >= 9) {
 			setShowSecret(true);
 		}
+
+		// Create burst effect
+		const rect = (e.target as HTMLElement).getBoundingClientRect();
+		const centerX = rect.left + rect.width / 2;
+		const centerY = rect.top + rect.height / 2;
+		
+		const newEggs = Array.from({ length: 8 }, (_, i) => {
+			const angle = (i / 8) * Math.PI * 2;
+			const speed = 3 + Math.random() * 2;
+			return {
+				id: Date.now() + i,
+				x: centerX,
+				y: centerY,
+				vx: Math.cos(angle) * speed,
+				vy: Math.sin(angle) * speed
+			};
+		});
+		
+		setBurstEggs(prev => [...prev, ...newEggs]);
+		
+		// Remove eggs after animation
+		setTimeout(() => {
+			setBurstEggs(prev => prev.filter(egg => !newEggs.some(newEgg => newEgg.id === egg.id)));
+		}, 2000);
 	};
 
 	return (
@@ -119,6 +144,35 @@ export default function EasterEgg() {
 					<p>Psst... there might be more secrets hidden around here 👀</p>
 				</div>
 			</div>
+
+			{/* Burst eggs */}
+			{burstEggs.map(egg => (
+				<div
+					key={egg.id}
+					className="fixed pointer-events-none text-2xl z-40"
+					style={{
+						left: egg.x,
+						top: egg.y,
+						transform: 'translate(-50%, -50%)',
+						animation: `eggBurst 2s ease-out forwards`
+					}}
+				>
+					🥚
+				</div>
+			))}
+
+			<style jsx>{`
+				@keyframes eggBurst {
+					0% {
+						transform: translate(-50%, -50%) scale(1) rotate(0deg);
+						opacity: 1;
+					}
+					100% {
+						transform: translate(-50%, -50%) translate(${Math.random() * 400 - 200}px, ${Math.random() * 400 - 200}px) scale(0.5) rotate(720deg);
+						opacity: 0;
+					}
+				}
+			`}</style>
 		</div>
 	);
 }

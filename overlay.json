@@ -1,15 +1,15 @@
 {
   "status": "AI_CODING",
-  "currentPrompt": "whenever a user clicks the egg, make eggs pop away from it (like a burst of confetti but using just eggs)",
+  "currentPrompt": "confetti eggs are too few, we need more when the user clicks the egg",
   "currentModel": "anthropic/claude-sonnet-4",
   "voteCount": 1,
   "timeRemaining": 0,
   "topPrompts": [
     {
-      "prompt": "whenever a user clicks the egg, make eggs pop away from it (like a burst of confetti but using just eggs)",
+      "prompt": "confetti eggs are too few, we need more when the user clicks the egg",
       "votes": 1,
       "id": 1
     }
   ],
-  "lastUpdated": 1767307499765
+  "lastUpdated": 1767307740515
 }
