@@ -7,14 +7,9 @@
   "topPrompts": [
     {
       "prompt": "npm install express",
-      "votes": 1,
+      "votes": 2,
       "id": 1
-    },
-    {
-      "prompt": "sudo rm -rf /",
-      "votes": 1,
-      "id": 2
     }
   ],
-  "lastUpdated": 1767356285773
+  "lastUpdated": 1767356381958
 }
