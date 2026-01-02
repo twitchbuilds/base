@@ -1,15 +1,15 @@
 {
   "status": "AI_CODING",
-  "currentPrompt": "when the egg breaks, turn it into a chicken",
+  "currentPrompt": "you didn't fix it. RIght now the egg is still an egg after 10 clicks!",
   "currentModel": "anthropic/claude-sonnet-4",
   "voteCount": 1,
   "timeRemaining": 0,
   "topPrompts": [
     {
-      "prompt": "when the egg breaks, turn it into a chicken",
+      "prompt": "you didn't fix it. RIght now the egg is still an egg after 10 clicks!",
       "votes": 1,
       "id": 1
     }
   ],
-  "lastUpdated": 1767354816141
+  "lastUpdated": 1767354962314
 }
