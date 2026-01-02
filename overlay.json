@@ -1,15 +1,15 @@
 {
   "status": "AI_CODING",
-  "currentPrompt": "npm install express",
+  "currentPrompt": "create a page /twitchbuilds that explains what Twitchbuilds is (TwitchBuilds is an interactive live stream where the \"Hive Mind\" of Twitch Chat collectively builds a software product. Instead of controlling a game character (like TwitchPlaysPokemon), viewers act as the Product Manager, voting on prompts that an autonomous AI agent turns into code in real-time.)",
   "currentModel": "anthropic/claude-sonnet-4",
-  "voteCount": 2,
+  "voteCount": 1,
   "timeRemaining": 0,
   "topPrompts": [
     {
-      "prompt": "npm install express",
-      "votes": 2,
+      "prompt": "create a page /twitchbuilds that explains what Twitchbuilds is (TwitchBuilds is an interactive live stream where the \"Hive Mind\" of Twitch Chat collectively builds a software product. Instead of controlling a game character (like TwitchPlaysPokemon), viewers act as the Product Manager, voting on prompts that an autonomous AI agent turns into code in real-time.)",
+      "votes": 1,
       "id": 1
     }
   ],
-  "lastUpdated": 1767356381958
+  "lastUpdated": 1767356637339
 }
