@@ -6,6 +6,7 @@ export default function EasterEgg() {
 	const [konami, setKonami] = useState("");
 	const [showSecret, setShowSecret] = useState(false);
 	const [clicks, setClicks] = useState(0);
+	const [eggStage, setEggStage] = useState<'egg' | 'hatching' | 'chicken'>('egg');
 	const [burstEggs, setBurstEggs] = useState<Array<{id: number, x: number, y: number, vx: number, vy: number, isChicken: boolean}>>([]);
 	const [showEggWall, setShowEggWall] = useState(false);
 
@@ -27,9 +28,13 @@ export default function EasterEgg() {
 
 	const handleEggClick = (e: React.MouseEvent) => {
 		setClicks(prev => prev + 1);
+		if (clicks >= 4) {
+			setEggStage('hatching');
+		}
 		if (clicks >= 9) {
 			setShowSecret(true);
 			setShowEggWall(true);
+			setEggStage('chicken');
 		}
 
 		// Create burst effect
@@ -86,7 +91,7 @@ export default function EasterEgg() {
 								onClick={handleEggClick}
 								aria-label={`Click the egg. ${clicks} out of 10 clicks completed.`}
 							>
-								🥚
+								{eggStage === 'egg' ? '🥚' : eggStage === 'hatching' ? '🐣' : '🐔'}
 							</button>
 							<p className="text-sm mt-2">Clicks: {clicks}/10</p>
 							{clicks >= 5 && clicks < 10 && (

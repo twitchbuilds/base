@@ -1,15 +1,15 @@
 {
   "status": "AI_CODING",
-  "currentPrompt": "you didn't fix it. RIght now the egg is still an egg after 10 clicks!",
+  "currentPrompt": "when we hit five clicks, it should be the chicken in the shell, when we hit 10 clicks it should be an adult chicken",
   "currentModel": "anthropic/claude-sonnet-4",
   "voteCount": 1,
   "timeRemaining": 0,
   "topPrompts": [
     {
-      "prompt": "you didn't fix it. RIght now the egg is still an egg after 10 clicks!",
+      "prompt": "when we hit five clicks, it should be the chicken in the shell, when we hit 10 clicks it should be an adult chicken",
       "votes": 1,
       "id": 1
     }
   ],
-  "lastUpdated": 1767354962314
+  "lastUpdated": 1767355329284
 }
