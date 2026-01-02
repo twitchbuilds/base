@@ -42,7 +42,7 @@ export default function TwitchBuilds() {
                 <p className="text-gray-400 text-sm">Participate in polls and decisions about what to build next</p>
               </div>
               <div className="text-center">
-                <div className="text-4xl mb-3">🤖</div>
+                <div className="text-4xl mb-3"><span className="robot-turn">🤖</span></div>
                 <h3 className="text-lg font-semibold mb-2">AI Builds</h3>
                 <p className="text-gray-400 text-sm">Watch as AI interprets chat's vision and writes code live</p>
               </div>

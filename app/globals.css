@@ -25,18 +25,35 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-@keyframes sway {
-  0%, 100% {
-    transform: translateX(-3px) rotate(-2deg);
-  }
-  50% {
-    transform: translateX(3px) rotate(2deg);
-  }
-}
-
 @layer utilities {
   .rocket-sway {
     animation: sway 2s ease-in-out infinite;
     display: inline-block;
+  }
+  
+  .robot-turn {
+    animation: robotTurn 3s ease-in-out infinite;
+    display: inline-block;
+  }
+
+  @keyframes sway {
+    0%, 100% {
+      transform: translateX(-3px) rotate(-2deg);
+    }
+    50% {
+      transform: translateX(3px) rotate(2deg);
+    }
+  }
+
+  @keyframes robotTurn {
+    0%, 100% {
+      transform: rotateY(0deg);
+    }
+    25% {
+      transform: rotateY(-15deg);
+    }
+    75% {
+      transform: rotateY(15deg);
+    }
   }
 }
