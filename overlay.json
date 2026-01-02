@@ -1,15 +1,15 @@
 {
   "status": "AI_CODING",
-  "currentPrompt": "create a page /twitchbuilds that explains what Twitchbuilds is (TwitchBuilds is an interactive live stream where the \"Hive Mind\" of Twitch Chat collectively builds a software product. Instead of controlling a game character (like TwitchPlaysPokemon), viewers act as the Product Manager, voting on prompts that an autonomous AI agent turns into code in real-time.)",
+  "currentPrompt": "turn the \"watch live\" button into a link to google.com",
   "currentModel": "anthropic/claude-sonnet-4",
   "voteCount": 1,
   "timeRemaining": 0,
   "topPrompts": [
     {
-      "prompt": "create a page /twitchbuilds that explains what Twitchbuilds is (TwitchBuilds is an interactive live stream where the \"Hive Mind\" of Twitch Chat collectively builds a software product. Instead of controlling a game character (like TwitchPlaysPokemon), viewers act as the Product Manager, voting on prompts that an autonomous AI agent turns into code in real-time.)",
+      "prompt": "turn the \"watch live\" button into a link to google.com",
       "votes": 1,
       "id": 1
     }
   ],
-  "lastUpdated": 1767356637339
+  "lastUpdated": 1767357025055
 }
