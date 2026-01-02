@@ -6,7 +6,7 @@ export default function EasterEgg() {
 	const [konami, setKonami] = useState("");
 	const [showSecret, setShowSecret] = useState(false);
 	const [clicks, setClicks] = useState(0);
-	const [burstEggs, setBurstEggs] = useState<Array<{id: number, x: number, y: number, vx: number, vy: number}>>([]);
+	const [burstEggs, setBurstEggs] = useState<Array<{id: number, x: number, y: number, vx: number, vy: number, isChicken: boolean}>>([]);
 	const [showEggWall, setShowEggWall] = useState(false);
 
 	const konamiCode = "ArrowUpArrowUpArrowDownArrowDownArrowLeftArrowRightArrowLeftArrowRightKeyBKeyA";
@@ -45,13 +45,23 @@ export default function EasterEgg() {
 				x: centerX,
 				y: centerY,
 				vx: Math.cos(angle) * speed,
-				vy: Math.sin(angle) * speed
+				vy: Math.sin(angle) * speed,
+				isChicken: false
 			};
 		});
 		
 		setBurstEggs(prev => [...prev, ...newEggs]);
 		
-		// Remove eggs after animation
+		// Transform eggs into chickens after 500ms
+		setTimeout(() => {
+			setBurstEggs(prev => prev.map(egg => 
+				newEggs.some(newEgg => newEgg.id === egg.id) 
+					? { ...egg, isChicken: true }
+					: egg
+			));
+		}, 500);
+		
+		// Remove eggs/chickens after animation
 		setTimeout(() => {
 			setBurstEggs(prev => prev.filter(egg => !newEggs.some(newEgg => newEgg.id === egg.id)));
 		}, 2000);
@@ -202,7 +212,7 @@ export default function EasterEgg() {
 							animation: `eggBurst-${egg.id} 2s ease-out forwards`
 						}}
 					>
-						🥚
+						{egg.isChicken ? '🐣' : '🥚'}
 						<style jsx>{`
 							@keyframes eggBurst-${egg.id} {
 								0% {
