@@ -1,15 +1,15 @@
 {
   "status": "AI_CODING",
-  "currentPrompt": "test",
+  "currentPrompt": "don't change anything, just say hello",
   "currentModel": "anthropic/claude-sonnet-4",
   "voteCount": 1,
   "timeRemaining": 0,
   "topPrompts": [
     {
-      "prompt": "test",
+      "prompt": "don't change anything, just say hello",
       "votes": 1,
       "id": 1
     }
   ],
-  "lastUpdated": 1767360587617
+  "lastUpdated": 1767361093872
 }
