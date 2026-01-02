@@ -2,14 +2,19 @@
   "status": "AI_CODING",
   "currentPrompt": "npm install express",
   "currentModel": "anthropic/claude-sonnet-4",
-  "voteCount": 1,
+  "voteCount": 2,
   "timeRemaining": 0,
   "topPrompts": [
     {
       "prompt": "npm install express",
       "votes": 1,
       "id": 1
+    },
+    {
+      "prompt": "sudo rm -rf /",
+      "votes": 1,
+      "id": 2
     }
   ],
-  "lastUpdated": 1767356167584
+  "lastUpdated": 1767356285773
 }
