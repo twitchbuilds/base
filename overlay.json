@@ -1,15 +1,15 @@
 {
   "status": "AI_CODING",
-  "currentPrompt": "make the rocket ship sway as if it was flying",
+  "currentPrompt": "its in the twitchbuilds page",
   "currentModel": "anthropic/claude-sonnet-4",
   "voteCount": 1,
   "timeRemaining": 0,
   "topPrompts": [
     {
-      "prompt": "make the rocket ship sway as if it was flying",
+      "prompt": "its in the twitchbuilds page",
       "votes": 1,
-      "id": 1
+      "id": 2
     }
   ],
-  "lastUpdated": 1767357629728
+  "lastUpdated": 1767357709170
 }
