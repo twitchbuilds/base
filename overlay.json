@@ -1,17 +1,17 @@
 {
   "status": "EXECUTING",
-  "currentPrompt": "test2",
+  "currentPrompt": "test",
   "currentModel": "anthropic/claude-sonnet-4",
   "voteCount": 1,
   "timeRemaining": 0,
   "topPrompts": [
     {
-      "prompt": "test2",
+      "prompt": "test",
       "votes": 1,
       "id": 1,
       "percentage": 100
     }
   ],
-  "lastUpdated": 1767364545760,
+  "lastUpdated": 1767470778403,
   "queueSize": 3
 }
