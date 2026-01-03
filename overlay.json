@@ -1,17 +1,23 @@
 {
   "status": "EXECUTING",
-  "currentPrompt": "test",
+  "currentPrompt": "change the easter egg headline to be multiple colors",
   "currentModel": "anthropic/claude-sonnet-4",
-  "voteCount": 1,
+  "voteCount": 2,
   "timeRemaining": 0,
   "topPrompts": [
     {
-      "prompt": "test",
+      "prompt": "change the easter egg headline to be multiple colors",
       "votes": 1,
       "id": 1,
-      "percentage": 100
+      "percentage": 50
+    },
+    {
+      "prompt": "change the easter egg headline to multiple colors",
+      "votes": 1,
+      "id": 2,
+      "percentage": 50
     }
   ],
-  "lastUpdated": 1767470778403,
+  "lastUpdated": 1767471012813,
   "queueSize": 3
 }
