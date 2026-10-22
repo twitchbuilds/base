@@ -451,7 +451,9 @@ function update(dt) {
       blip(pitch, 0.06, 'square', 0.035, 180);
       blip(pitch * 1.5, 0.09, 'sine', 0.03, 120);
       floatText(c.x, c.y - 4, '+25', '#ffd166');
+      const spark = ['#ffd166', '#ff5fa2', '#7df9ff', '#9dff6b', '#c08bff'][Math.floor(Math.random() * 5)];
       burst(c.x, c.y, '#ffd166', 7, 150, 0.45);
+      burst(c.x, c.y, spark, 6, 170, 0.4);
       if (Math.random() < 0.5) burst(c.x, c.y, '#fff3b0', 3, 90, 0.3);
     }
   }
@@ -655,6 +657,26 @@ function render() {
 
   ctx.save();
   if (game.shake > 0.3) ctx.translate(rand(-game.shake, game.shake), rand(-game.shake, game.shake));
+
+  // drifting colour nebula
+  const nt = performance.now() / 1000;
+  const blobs = [
+    { c: '#ff2d95', x: 0.30 + 0.07 * Math.sin(nt * 0.13), y: 0.34 + 0.05 * Math.cos(nt * 0.17), r: 0.46 },
+    { c: '#2fd8ff', x: 0.76 + 0.06 * Math.cos(nt * 0.11), y: 0.62 + 0.05 * Math.sin(nt * 0.19), r: 0.50 },
+    { c: '#8b5cff', x: 0.56 + 0.09 * Math.sin(nt * 0.09 + 2), y: 0.18 + 0.05 * Math.cos(nt * 0.15 + 1), r: 0.40 },
+    { c: '#2dff9e', x: 0.14 + 0.05 * Math.cos(nt * 0.14 + 3), y: 0.78 + 0.04 * Math.sin(nt * 0.12), r: 0.30 }
+  ];
+  ctx.globalCompositeOperation = themeName === 'dark' ? 'lighter' : 'source-over';
+  for (const b of blobs) {
+    const cx = b.x * W, cy = b.y * H, rr = b.r * Math.max(W, H) * 0.55;
+    const ng = ctx.createRadialGradient(cx, cy, 0, cx, cy, rr);
+    ng.addColorStop(0, b.c + (themeName === 'dark' ? '2e' : '22'));
+    ng.addColorStop(0.55, b.c + (themeName === 'dark' ? '12' : '0f'));
+    ng.addColorStop(1, b.c + '00');
+    ctx.fillStyle = ng;
+    ctx.beginPath(); ctx.arc(cx, cy, rr, 0, 7); ctx.fill();
+  }
+  ctx.globalCompositeOperation = 'source-over';
 
   // stars
   for (const s of stars) {
