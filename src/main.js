@@ -12,6 +12,40 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
+// ---------- Theme ----------
+const THEMES = {
+  dark: {
+    name: 'DARK', bg: ['#120a2e', '#08051a', '#02010a'],
+    starA: '#bfe8ff', starB: '#7d8fbf',
+    hud: '#eaffff', hudGlow: '#39d0ff', sub: '#6f87b8',
+    hull: '#dbeaff', accent: '#1f8fff', shipGlow: '#39d0ff',
+    bullet: '#eaffff', bulletGlow: '#7df9ff',
+    banner: '#eaffff', bannerGlow: '#7df9ff',
+    control: 'rgba(160,185,230,0.75)', overlay: 'rgba(3,2,10,0.72)',
+    overlayText: '#f4eaff', wave: '#8fa6d6', life: '#7df9ff', lifeOff: 'rgba(120,150,200,0.22)',
+    trail: ['#9df6ff', '#2ea8ff']
+  },
+  light: {
+    name: 'LIGHT', bg: ['#ffe3f1', '#e3edff', '#cfe0ff'],
+    starA: '#8b6cf0', starB: '#a994f5',
+    hud: '#2a1a55', hudGlow: '#ffffff', sub: '#7a68a8',
+    hull: '#43307a', accent: '#ff4d9d', shipGlow: '#ff8fd0',
+    bullet: '#2b2a6e', bulletGlow: '#9b7bff',
+    banner: '#2a1a55', bannerGlow: '#ff8fd0',
+    control: 'rgba(72,56,120,0.8)', overlay: 'rgba(255,245,252,0.8)',
+    overlayText: '#2a1a55', wave: '#7a68a8', life: '#ff5fa2', lifeOff: 'rgba(80,60,140,0.18)',
+    trail: ['#ffb3dd', '#ff4d9d']
+  }
+};
+let themeName = localStorage.getItem('void_theme') || 'dark';
+const T = () => THEMES[themeName];
+function toggleTheme() {
+  themeName = themeName === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('void_theme', themeName);
+  game.banner = T().name + ' MODE'; game.bannerTimer = 1.2;
+  blip(themeName === 'dark' ? 320 : 760, 0.16, 'sine', 0.05, themeName === 'dark' ? -120 : 180);
+}
+
 // ---------- Audio ----------
 let AC = null;
 function audio() {
@@ -64,6 +98,7 @@ window.addEventListener('keydown', e => {
   audio();
   if (e.key === ' ' && game.state === 'playing') fire();
   if (e.key.toLowerCase() === 'r') reset();
+  if (e.key.toLowerCase() === 'l') toggleTheme();
   if (e.key.toLowerCase() === 'p' && game.state === 'playing') game.paused = !game.paused;
 });
 window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
@@ -327,19 +362,21 @@ function drawShip(x, y, angle, invuln) {
   // exhaust flame
   const fl = 12 + Math.sin(performance.now() / 40) * 5;
   const grd = ctx.createLinearGradient(0, 10, 0, 10 + fl);
-  grd.addColorStop(0, '#9df6ff'); grd.addColorStop(0.5, '#2ea8ff'); grd.addColorStop(1, 'rgba(255,140,0,0)');
+  const tc = T().trail; grd.addColorStop(0, tc[0]); grd.addColorStop(0.5, tc[1]); grd.addColorStop(1, 'rgba(255,140,0,0)');
   ctx.fillStyle = grd;
   ctx.beginPath(); ctx.moveTo(-6, 10); ctx.lineTo(0, 10 + fl); ctx.lineTo(6, 10); ctx.closePath(); ctx.fill();
 
   // hull
-  ctx.shadowColor = '#39d0ff'; ctx.shadowBlur = 18;
-  ctx.fillStyle = '#dbeaff';
+  ctx.shadowColor = T().shipGlow; ctx.shadowBlur = 22;
+  ctx.fillStyle = T().hull;
+  ctx.strokeStyle = themeName === 'light' ? '#2a1a55' : 'rgba(180,230,255,0.5)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(0, 0, 19, 0, 7); ctx.stroke();
   ctx.beginPath();
   ctx.moveTo(0, -20); ctx.lineTo(9, 2); ctx.lineTo(18, 12); ctx.lineTo(6, 9);
   ctx.lineTo(0, 14); ctx.lineTo(-6, 9); ctx.lineTo(-18, 12); ctx.lineTo(-9, 2);
   ctx.closePath(); ctx.fill();
   ctx.shadowBlur = 0;
-  ctx.fillStyle = '#1f8fff';
+  ctx.fillStyle = T().accent;
   ctx.beginPath(); ctx.moveTo(0, -13); ctx.lineTo(5, 1); ctx.lineTo(0, 7); ctx.lineTo(-5, 1); ctx.closePath(); ctx.fill();
   ctx.fillStyle = '#ff9a3d';
   ctx.beginPath(); ctx.arc(0, -6, 3, 0, 7); ctx.fill();
@@ -462,7 +499,8 @@ function drawEnemy(e) {
 function render() {
   // background
   const bg = ctx.createRadialGradient(W / 2, H * 0.6, 0, W / 2, H * 0.6, Math.max(W, H) * 0.8);
-  bg.addColorStop(0, '#120a2e'); bg.addColorStop(0.5, '#08051a'); bg.addColorStop(1, '#02010a');
+  const th = T();
+  bg.addColorStop(0, th.bg[0]); bg.addColorStop(0.5, th.bg[1]); bg.addColorStop(1, th.bg[2]);
   ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
 
   ctx.save();
@@ -470,8 +508,8 @@ function render() {
 
   // stars
   for (const s of stars) {
-    ctx.globalAlpha = 0.25 + s.z * 0.3;
-    ctx.fillStyle = s.z > 1.6 ? '#bfe8ff' : '#7d8fbf';
+    ctx.globalAlpha = (themeName === 'light' ? 0.45 : 0.25) + s.z * 0.3;
+    ctx.fillStyle = s.z > 1.6 ? th.starA : th.starB;
     ctx.fillRect(s.x, s.y, s.s, s.s * (1 + s.z));
   }
   ctx.globalAlpha = 1;
@@ -498,8 +536,8 @@ function render() {
 
   // bullets
   for (const b of bullets) {
-    ctx.shadowColor = '#7df9ff'; ctx.shadowBlur = 18;
-    ctx.fillStyle = '#eaffff';
+    ctx.shadowColor = th.bulletGlow; ctx.shadowBlur = 18;
+    ctx.fillStyle = th.bullet;
     ctx.beginPath(); ctx.ellipse(b.x, b.y, b.r, b.r * 2.4, 0, 0, 7); ctx.fill();
     ctx.shadowBlur = 0;
   }
@@ -539,8 +577,8 @@ function render() {
     ctx.globalAlpha = a;
     ctx.textAlign = 'center';
     ctx.font = '900 44px Orbitron, sans-serif';
-    ctx.shadowColor = '#7df9ff'; ctx.shadowBlur = 30;
-    ctx.fillStyle = '#eaffff';
+    ctx.shadowColor = T().bannerGlow; ctx.shadowBlur = themeName === 'light' ? 10 : 30;
+    ctx.fillStyle = T().banner;
     ctx.fillText(game.banner, W / 2, H * 0.3);
     ctx.shadowBlur = 0; ctx.globalAlpha = 1;
   }
@@ -557,12 +595,12 @@ function drawHUD() {
   ctx.save();
   ctx.textAlign = 'left'; ctx.textBaseline = 'top';
   ctx.font = '900 30px Orbitron, sans-serif';
-  ctx.fillStyle = '#eaffff';
-  ctx.shadowColor = '#39d0ff'; ctx.shadowBlur = 16;
+  ctx.fillStyle = T().hud;
+  ctx.shadowColor = T().hudGlow; ctx.shadowBlur = 16;
   ctx.fillText(String(game.score).padStart(6, '0'), 22, 18);
   ctx.shadowBlur = 0;
   ctx.font = 'bold 12px Orbitron, sans-serif';
-  ctx.fillStyle = '#6f87b8';
+  ctx.fillStyle = T().sub;
   ctx.fillText('SCORE', 24, 54);
   ctx.fillText(`BEST ${game.best}`, 24, 74);
 
@@ -571,8 +609,8 @@ function drawHUD() {
     ctx.save();
     ctx.translate(W - 34 - i * 30, 34);
     ctx.scale(0.72, 0.72);
-    ctx.fillStyle = i < game.lives ? '#7df9ff' : 'rgba(120,150,200,0.22)';
-    ctx.shadowColor = '#39d0ff'; ctx.shadowBlur = i < game.lives ? 14 : 0;
+    ctx.fillStyle = i < game.lives ? T().life : T().lifeOff;
+    ctx.shadowColor = T().hudGlow; ctx.shadowBlur = i < game.lives ? 14 : 0;
     ctx.beginPath();
     ctx.moveTo(0, -18); ctx.lineTo(10, 2); ctx.lineTo(17, 13); ctx.lineTo(0, 9); ctx.lineTo(-17, 13); ctx.lineTo(-10, 2);
     ctx.closePath(); ctx.fill();
@@ -583,7 +621,7 @@ function drawHUD() {
   // wave + combo
   ctx.textAlign = 'right';
   ctx.font = 'bold 14px Orbitron, sans-serif';
-  ctx.fillStyle = '#8fa6d6';
+  ctx.fillStyle = T().wave;
   ctx.fillText(`WAVE ${game.wave}`, W - 22, 58);
   if (game.combo > 1) {
     ctx.fillStyle = '#ffd166';
@@ -594,24 +632,34 @@ function drawHUD() {
   // controls bar
   ctx.textAlign = 'center';
   ctx.font = 'bold 12px Orbitron, sans-serif';
-  ctx.fillStyle = 'rgba(160,185,230,0.75)';
-  ctx.fillText('WASD / ARROWS  MOVE      SPACE  FIRE      P  PAUSE      R  RESTART', W / 2, H - 26);
+  ctx.fillStyle = T().control;
+  ctx.fillText('WASD / ARROWS  MOVE      SPACE  FIRE      P  PAUSE      R  RESTART      L  DAY / NIGHT', W / 2, H - 26);
+  // theme chip
+  ctx.textAlign = 'right'; ctx.font = 'bold 12px Orbitron, sans-serif';
+  const label = themeName === 'dark' ? '☾ NIGHT' : '☀ DAY';
+  const cw = ctx.measureText(label).width + 26;
+  ctx.fillStyle = themeName === 'dark' ? 'rgba(125,249,255,0.12)' : 'rgba(255,95,162,0.16)';
+  ctx.beginPath(); ctx.roundRect(W - 22 - cw, H - 56, cw, 26, 8); ctx.fill();
+  ctx.fillStyle = themeName === 'dark' ? '#7df9ff' : '#ff4d9d';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(label, W - 35, H - 43);
+  ctx.textBaseline = 'top';
   ctx.restore();
 }
 
 function overlay(title, sub, extra) {
-  ctx.fillStyle = 'rgba(3,2,10,0.65)';
+  ctx.fillStyle = T().overlay;
   ctx.fillRect(0, 0, W, H);
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.font = '900 62px Orbitron, sans-serif';
   ctx.shadowColor = '#ff4d9d'; ctx.shadowBlur = 34;
-  ctx.fillStyle = '#f4eaff';
+  ctx.fillStyle = T().overlayText;
   ctx.fillText(title, W / 2, H * 0.42);
   ctx.shadowBlur = 0;
   ctx.font = 'bold 18px Orbitron, sans-serif';
-  ctx.fillStyle = '#9fb4e0';
+  ctx.fillStyle = T().sub;
   if (extra) ctx.fillText(extra, W / 2, H * 0.52);
-  ctx.fillStyle = '#7df9ff';
+  ctx.fillStyle = T().hudGlow === '#ffffff' ? '#ff4d9d' : '#7df9ff';
   const pulse = 0.65 + 0.35 * Math.sin(performance.now() / 260);
   ctx.globalAlpha = pulse;
   ctx.fillText(sub, W / 2, H * 0.6);
