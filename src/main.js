@@ -99,6 +99,7 @@ window.addEventListener('keydown', e => {
   if (e.key === ' ' && game.state === 'playing') fire();
   if (e.key.toLowerCase() === 'r') reset();
   if (e.key.toLowerCase() === 'l') toggleTheme();
+  if (e.key.toLowerCase() === 'b' && game.state === 'playing') spawnBoss();
   if (e.key.toLowerCase() === 'p' && game.state === 'playing') game.paused = !game.paused;
 });
 window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
@@ -108,7 +109,7 @@ const game = {
   state: 'playing', score: 0, best: +(localStorage.getItem('voidrunner_best') || 0),
   lives: 3, wave: 1, shake: 0, time: 0, paused: false,
   spawnTimer: 0, spawnRate: 1.15, combo: 1, comboTimer: 0,
-  flash: 0, banner: '', bannerTimer: 0
+  flash: 0, banner: '', bannerTimer: 0, boss: null, bossWavesDone: []
 };
 
 const player = { x: 0, y: 0, vx: 0, vy: 0, r: 15, cool: 0, invuln: 0, thrust: 0, angle: 0 };
@@ -125,7 +126,7 @@ initStars();
 function reset() {
   game.state = 'playing'; game.score = 0; game.lives = 3; game.wave = 1;
   game.shake = 0; game.spawnTimer = 0.6; game.spawnRate = 1.15; game.combo = 1; game.comboTimer = 0;
-  game.paused = false; game.banner = 'WAVE 1 — CATS INBOUND'; game.bannerTimer = 1.6;
+  game.paused = false; game.boss = null; game.bossWavesDone = []; game.banner = 'WAVE 1 — CATS INBOUND'; game.bannerTimer = 1.6;
   bullets = []; ebullets = []; enemies = []; particles = []; powerups = []; floaties = [];
   player.x = W / 2; player.y = H * 0.78; player.vx = 0; player.vy = 0;
   player.cool = 0; player.invuln = 1.5;
@@ -201,6 +202,36 @@ function damageEnemy(e, dmg, bx, by) {
   }
 }
 
+// ---------- Boss ----------
+function spawnBoss() {
+  const hp = 55 + game.wave * 22;
+  game.boss = {
+    type: 'boss', x: W / 2, y: -130, targetY: Math.min(320, H * 0.32), r: 62,
+    hp, maxhp: hp, color: '#ff4d9d', hitFlash: 0, rot: 0, t: 0,
+    entering: true, shootA: 1.6, shootB: 2.6, summonT: 5.5, dead: false
+  };
+  game.banner = 'WARNING — CAT QUEEN'; game.bannerTimer = 2.2;
+  blip(90, 0.5, 'sawtooth', 0.08, 60); meow(0.55);
+}
+
+function damageBoss(b, bx, by) {
+  b.hp -= 1; b.hitFlash = 0.1;
+  burst(bx, by, '#ffffff', 3, 110, 0.2);
+  if (b.hp <= 0) {
+    b.dead = true;
+    const pts = 600 + game.wave * 250;
+    game.score += pts;
+    floatText(b.x, b.y, '+' + pts, '#ffd166');
+    for (let i = 0; i < 5; i++) burst(b.x + rand(-50, 50), b.y + rand(-40, 40), i % 2 ? '#ffd166' : '#ff4d9d', 30, 400, 1.1);
+    game.shake = 26; game.flash = 0.7;
+    noiseBurst(0.8, 0.25); meow(0.5); blip(140, 0.6, 'sine', 0.08, 220);
+    game.banner = 'CAT QUEEN DOWN!'; game.bannerTimer = 2.2;
+    game.bossWavesDone.push(game.wave);
+    for (let i = 0; i < 2; i++) powerups.push({ x: b.x + rand(-60, 60), y: b.y, vy: 60, r: 12, kind: i ? 'shield' : 'rapid', t: 0 });
+    game.boss = null;
+  }
+}
+
 // ---------- Update ----------
 function update(dt) {
   game.time += dt;
@@ -244,12 +275,14 @@ function update(dt) {
 
   // spawn
   game.spawnTimer -= dt;
-  if (game.spawnTimer <= 0) {
+  if (!game.boss && game.spawnTimer <= 0) {
     spawnEnemy();
     game.spawnTimer = Math.max(0.4, game.spawnRate - game.wave * 0.04) * rand(0.7, 1.3);
   }
+  // boss arrives every third wave
+  if (!game.boss && game.wave % 3 === 0 && !game.bossWavesDone.includes(game.wave)) spawnBoss();
   const newWave = 1 + Math.floor(game.score / 500);
-  if (newWave > game.wave) {
+  if (!game.boss && newWave > game.wave) {
     game.wave = newWave;
     game.banner = 'WAVE ' + game.wave + ' — MORE CATS'; game.bannerTimer = 1.8;
     blip(220, 0.25, 'sawtooth', 0.06, 260); blip(440, 0.35, 'sine', 0.05, 220);
@@ -298,6 +331,54 @@ function update(dt) {
     if (player.invuln <= 0 && Math.hypot(player.x - e.x, player.y - e.y) < player.r + e.r * 0.85) {
       e.dead = true; hurtPlayer(); burst(e.x, e.y, e.color, 20, 260, 0.7);
     }
+  }
+
+  // boss update
+  const boss = game.boss;
+  if (boss) {
+    boss.t += dt; boss.hitFlash -= dt; boss.rot += dt * 0.6;
+    if (boss.entering) {
+      boss.y += 150 * dt;
+      if (boss.y >= boss.targetY) { boss.y = boss.targetY; boss.entering = false; }
+    } else {
+      boss.x = W / 2 + Math.sin(boss.t * 0.45) * Math.min(W * 0.32, 460);
+      boss.y = boss.targetY + Math.sin(boss.t * 1.1) * 18;
+      boss.shootA -= dt; boss.shootB -= dt; boss.summonT -= dt;
+      if (boss.shootA <= 0) {
+        boss.shootA = 2.1;
+        const n = 14;
+        for (let i = 0; i < n; i++) {
+          const a = Math.PI * 0.12 + (i / (n - 1)) * Math.PI * 0.76;
+          ebullets.push({ x: boss.x, y: boss.y + 30, vx: Math.cos(a) * 190, vy: Math.sin(a) * 190, r: 6, life: 5, color: '#ffd166' });
+        }
+        meow(0.7); game.shake = Math.max(game.shake, 4);
+      }
+      if (boss.shootB <= 0) {
+        boss.shootB = 1.15;
+        const a = Math.atan2(player.y - boss.y, player.x - boss.x);
+        for (let k = -1; k <= 1; k++) ebullets.push({ x: boss.x + k * 18, y: boss.y + 34, vx: Math.cos(a + k * 0.16) * 250, vy: Math.sin(a + k * 0.16) * 250, r: 5, life: 4, color: '#ff8fd0' });
+        blip(240, 0.1, 'square', 0.03, -80);
+      }
+      if (boss.summonT <= 0) {
+        boss.summonT = 7;
+        for (let k = -1; k <= 1; k += 2) {
+          const t = ENEMY_TYPES.scout;
+          enemies.push({ type: 'scout', x: boss.x + k * boss.r, y: boss.y, hp: 1, maxhp: 1, r: t.r, speed: 120, color: t.color, score: t.score, t: 0, baseX: boss.x + k * boss.r, shootTimer: 2, hitFlash: 0, rot: 0 });
+        }
+        meow(1.5);
+      }
+    }
+    // player bullets
+    for (const b of bullets) {
+      if (b.dead) continue;
+      if (Math.hypot(b.x - boss.x, b.y - boss.y) < boss.r * 0.95 + b.r) {
+        b.dead = true; damageBoss(boss, b.x, b.y);
+        if (boss.dead) break;
+      }
+    }
+    // body collision
+    if (!boss.dead && player.invuln <= 0 && Math.hypot(player.x - boss.x, player.y - boss.y) < player.r + boss.r * 0.7) hurtPlayer();
+    if (boss.dead) game.boss = null;
   }
 
   // enemy bullets hit player
@@ -402,7 +483,7 @@ function drawEnemy(e) {
     ctx.closePath(); ctx.fill();
   }
   // fluffy tank cheeks
-  if (e.type === 'tank') {
+  if (e.type === 'tank' || e.type === 'boss') {
     for (const sgn of [-1, 1]) {
       ctx.beginPath(); ctx.arc(sgn * r * 0.78, r * 0.18, r * 0.42, 0, 7); ctx.fill();
     }
@@ -433,7 +514,7 @@ function drawEnemy(e) {
     }
   }
   // tank forehead patch
-  if (e.type === 'tank') {
+  if (e.type === 'tank' || e.type === 'boss') {
     ctx.fillStyle = 'rgba(255,255,255,0.25)';
     ctx.beginPath(); ctx.ellipse(0, -r * 0.45, r * 0.34, r * 0.16, 0, 0, 7); ctx.fill();
   }
@@ -480,7 +561,7 @@ function drawEnemy(e) {
   }
 
   // pink collar for the big cats
-  if (e.type === 'tank') {
+  if (e.type === 'tank' || e.type === 'boss') {
     ctx.strokeStyle = '#ff4d9d'; ctx.lineWidth = Math.max(3, r * 0.14);
     ctx.beginPath(); ctx.arc(0, r * 0.5, r * 0.6, 0.15 * Math.PI, 0.85 * Math.PI); ctx.stroke();
     ctx.fillStyle = '#ffd166';
@@ -488,7 +569,7 @@ function drawEnemy(e) {
   }
   ctx.restore();
 
-  if (e.maxhp > 2 && e.hp < e.maxhp) {
+  if (e.type !== 'boss' && e.maxhp > 2 && e.hp < e.maxhp) {
     ctx.fillStyle = 'rgba(0,0,0,0.5)';
     ctx.fillRect(e.x - 22, e.y - e.r - 16, 44, 4);
     ctx.fillStyle = '#7dffb0';
@@ -549,6 +630,21 @@ function render() {
   }
 
   for (const e of enemies) drawEnemy(e);
+  if (game.boss) {
+    const b = game.boss;
+    drawEnemy(b);
+    // crown
+    ctx.save(); ctx.translate(b.x, b.y - b.r * 1.42); ctx.rotate(Math.sin(b.t) * 0.06);
+    ctx.shadowColor = '#ffd166'; ctx.shadowBlur = 20;
+    ctx.fillStyle = '#ffd166';
+    ctx.beginPath();
+    ctx.moveTo(-38, 12); ctx.lineTo(-44, -22); ctx.lineTo(-18, -2); ctx.lineTo(0, -30);
+    ctx.lineTo(18, -2); ctx.lineTo(44, -22); ctx.lineTo(38, 12);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#ff4d9d';
+    for (let i = -1; i <= 1; i++) { ctx.beginPath(); ctx.arc(i * 20, 2, 4.5, 0, 7); ctx.fill(); }
+    ctx.restore();
+  }
 
   if (game.state === 'playing' || game.state === 'over') {
     if (game.state === 'playing') drawShip(player.x, player.y, player.angle, player.invuln);
@@ -627,6 +723,25 @@ function drawHUD() {
     ctx.fillStyle = '#ffd166';
     ctx.font = '900 18px Orbitron, sans-serif';
     ctx.fillText(`x${game.combo.toFixed(2)}`, W - 22, 80);
+  }
+
+  // boss health bar
+  if (game.boss) {
+    const b = game.boss;
+    const bw = Math.min(620, W * 0.5), bx = (W - bw) / 2, by = 24;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.font = '900 15px Orbitron, sans-serif';
+    ctx.fillStyle = '#ff4d9d'; ctx.shadowColor = '#ff4d9d'; ctx.shadowBlur = 16;
+    ctx.fillText('SPACE CAT QUEEN', W / 2, by - 2);
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(20,10,40,0.7)';
+    ctx.beginPath(); ctx.roundRect(bx, by + 22, bw, 14, 7); ctx.fill();
+    const ratio = Math.max(0, b.hp / b.maxhp);
+    const grd = ctx.createLinearGradient(bx, 0, bx + bw, 0);
+    grd.addColorStop(0, '#ff4d9d'); grd.addColorStop(1, '#ffd166');
+    ctx.fillStyle = grd; ctx.shadowColor = '#ff4d9d'; ctx.shadowBlur = 12;
+    ctx.beginPath(); ctx.roundRect(bx, by + 22, Math.max(6, bw * ratio), 14, 7); ctx.fill();
+    ctx.shadowBlur = 0;
   }
 
   // controls bar

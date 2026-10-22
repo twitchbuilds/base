@@ -21,17 +21,18 @@ Every commit is one chat prompt, credited to the viewer who suggested it.
 
 | Round | Feature | Prompted by | Votes | Commit |
 | --- | --- | --- | --- | --- |
-| 3 | add a dark mode | @luna_codes | 5 |  |
+| 4 | boss battle at level 3 | @luna_codes | 7 |  |
+| 3 | add a dark mode | @luna_codes | 5 | [`6f64c87`](https://github.com/twitchbuilds/base/commit/6f64c87a7d8175e844d20f563104a1d0934f86fd) |
 | 2 | all enemies are cats | @cozy_otter | 5 | [`2be9756`](https://github.com/twitchbuilds/base/commit/2be9756363b0e6fdf678ad6c3e766ec25508116c) |
 | 1 | a top-down space shooter | 🤖 the AI | 3 | [`e9bd1f3`](https://github.com/twitchbuilds/base/commit/e9bd1f354265df733d6520d1f99ffe53429a9ee8) |
 
 ## Top contributors
 
-1. **cozy_otter**: 14 pts
-2. **luna_codes**: 10 pts
+1. **luna_codes**: 20 pts
+2. **cozy_otter**: 16 pts
 3. **Glitchy**: 7 pts
-4. **midnightmango**: 2 pts
-5. **sir_reload**: 2 pts
+4. **sir_reload**: 4 pts
+5. **ramen_dev**: 4 pts
 
 ---
 Run it yourself: `npm install && npm run dev`. Built with [Twitch Builds](https://github.com/twitchbuilds).
