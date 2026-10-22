@@ -21,14 +21,16 @@ Every commit is one chat prompt, credited to the viewer who suggested it.
 
 | Round | Feature | Prompted by | Votes | Commit |
 | --- | --- | --- | --- | --- |
-| 1 | a marketplace for renting out your cat | 🤖 the AI | 4 |  |
+| 2 | waitlist signup form | @ByteMe42 | 4 |  |
+| 1 | a marketplace for renting out your cat | 🤖 the AI | 4 | [`bf785ad`](https://github.com/twitchbuilds/base/commit/bf785ad65a6bb98108ae50e88643608d5b732f75) |
 
 ## Top contributors
 
-1. **pastaqueen**: 5 pts
-2. **cozy_otter**: 2 pts
-3. **hydrohomie**: 2 pts
-4. **stackunderflow**: 2 pts
+1. **ByteMe42**: 12 pts
+2. **pastaqueen**: 8 pts
+3. **cozy_otter**: 2 pts
+4. **hydrohomie**: 2 pts
+5. **stackunderflow**: 2 pts
 
 ---
 Run it yourself: `npm install && npm run dev`. Built with [Twitch Builds](https://github.com/twitchbuilds).
