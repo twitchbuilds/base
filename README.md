@@ -21,14 +21,16 @@ Every commit is one chat prompt, credited to the viewer who suggested it.
 
 | Round | Feature | Prompted by | Votes | Commit |
 | --- | --- | --- | --- | --- |
-| 1 | collectible coins | @ChonkyCat | 3 |  |
+| 2 | a high score leaderboard | @quietkeyboard | 6 |  |
+| 1 | collectible coins | @ChonkyCat | 3 | [`4ef46e9`](https://github.com/twitchbuilds/base/commit/4ef46e904defc6c2bca3e474206fa3352f79771f) |
 
 ## Top contributors
 
 1. **ChonkyCat**: 12 pts
-2. **sir_reload**: 3 pts
-3. **Glitchy**: 2 pts
-4. **lagspike**: 2 pts
+2. **quietkeyboard**: 12 pts
+3. **Glitchy**: 4 pts
+4. **lagspike**: 4 pts
+5. **sir_reload**: 3 pts
 
 ---
 Run it yourself: `npm install && npm run dev`. Built with [Twitch Builds](https://github.com/twitchbuilds).

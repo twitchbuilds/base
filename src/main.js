@@ -108,12 +108,40 @@ window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
 const game = {
   state: 'playing', score: 0, best: +(localStorage.getItem('voidrunner_best') || 0),
   lives: 3, wave: 1, shake: 0, time: 0, paused: false,
-  spawnTimer: 0, spawnRate: 1.15, combo: 1, comboTimer: 0,
+  spawnTimer: 0, spawnRate: 1.5, combo: 1, comboTimer: 0,
   flash: 0, banner: '', bannerTimer: 0, boss: null, bossWavesDone: [],
-  coins: 0, coinStreak: 0, coinTimer: 0
+  coins: 0, coinStreak: 0, coinTimer: 0,
+  runSaved: false, lastRunId: null, newRank: 0, newRecord: false
 };
 
 const player = { x: 0, y: 0, vx: 0, vy: 0, r: 15, cool: 0, invuln: 0, thrust: 0, angle: 0 };
+
+// ---------- Leaderboard (top five runs, saved locally) ----------
+const BOARD_KEY = 'voidrunner_board';
+function loadBoard() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(BOARD_KEY) || '[]');
+    return Array.isArray(raw) ? raw.filter(e => e && typeof e.score === 'number').slice(0, 5) : [];
+  } catch { return []; }
+}
+let board = loadBoard();
+function recordRun() {
+  if (game.runSaved || game.score <= 0) return;
+  game.runSaved = true;
+  const entry = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+    score: game.score, coins: game.coins, wave: game.wave,
+    date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })
+  };
+  board = [...board, entry]
+    .sort((a, b) => b.score - a.score || b.coins - a.coins)
+    .slice(0, 5);
+  try { localStorage.setItem(BOARD_KEY, JSON.stringify(board)); } catch {}
+  const i = board.findIndex(e => e.id === entry.id);
+  game.newRank = i === -1 ? 0 : i + 1;
+  game.newRecord = i === 0;
+  game.lastRunId = entry.id;
+}
 let bullets = [], ebullets = [], enemies = [], particles = [], stars = [], powerups = [], floaties = [], coins = [];
 
 function initStars() {
@@ -126,9 +154,10 @@ initStars();
 
 function reset() {
   game.state = 'playing'; game.score = 0; game.lives = 3; game.wave = 1;
-  game.shake = 0; game.spawnTimer = 0.6; game.spawnRate = 1.15; game.combo = 1; game.comboTimer = 0;
+  game.shake = 0; game.spawnTimer = 0.6; game.spawnRate = 1.5; game.combo = 1; game.comboTimer = 0;
   game.paused = false; game.boss = null; game.bossWavesDone = []; game.banner = 'WAVE 1 — CATS INBOUND'; game.bannerTimer = 1.6;
   game.coins = 0; game.coinStreak = 0; game.coinTimer = 0;
+  game.runSaved = false; game.lastRunId = null; game.newRank = 0; game.newRecord = false;
   bullets = []; ebullets = []; enemies = []; particles = []; powerups = []; floaties = []; coins = [];
   player.x = W / 2; player.y = H * 0.78; player.vx = 0; player.vy = 0;
   player.cool = 0; player.invuln = 1.5;
@@ -185,7 +214,7 @@ function spawnEnemy() {
   if (Math.random() < 0.35) meow(rand(0.8, 1.3));
   enemies.push({
     type, x, y: -40, hp: t.hp + Math.floor(game.wave / 4), maxhp: t.hp + Math.floor(game.wave / 4),
-    r: t.r, speed: t.speed + game.wave * 3.5, color: t.color, score: t.score,
+    r: t.r, speed: t.speed + game.wave * 2.2, color: t.color, score: t.score,
     t: rand(0, 10), baseX: x, shootTimer: rand(1.2, 2.6), hitFlash: 0, rot: 0
   });
 }
@@ -287,7 +316,7 @@ function update(dt) {
   game.spawnTimer -= dt;
   if (!game.boss && game.spawnTimer <= 0) {
     spawnEnemy();
-    game.spawnTimer = Math.max(0.4, game.spawnRate - game.wave * 0.04) * rand(0.7, 1.3);
+    game.spawnTimer = Math.max(0.65, game.spawnRate - game.wave * 0.03) * rand(0.75, 1.35);
   }
   // boss arrives every third wave
   if (!game.boss && game.wave % 3 === 0 && !game.bossWavesDone.includes(game.wave)) spawnBoss();
@@ -470,6 +499,7 @@ function hurtPlayer() {
   if (game.lives <= 0) {
     game.state = 'over';
     burst(player.x, player.y, '#fff', 60, 480, 1.2);
+    recordRun();
   }
 }
 
@@ -743,9 +773,11 @@ function render() {
 
   if (game.paused && game.state === 'playing') {
     overlay('PAUSED', 'PRESS P TO RESUME');
+    drawBoard(H * 0.68, null);
   }
   if (game.state === 'over') {
-    overlay('GAME OVER', 'PRESS R TO RESTART', `SCORE ${game.score}   BEST ${game.best}`);
+    overlay(game.newRecord ? 'NEW HIGH SCORE!' : 'GAME OVER', 'PRESS R TO RESTART', `SCORE ${game.score}   BEST ${game.best}   COINS ${game.coins}`);
+    drawBoard(H * 0.68, game.lastRunId);
   }
 }
 
@@ -840,6 +872,48 @@ function drawHUD() {
   ctx.textBaseline = 'middle';
   ctx.fillText(label, W - 35, H - 43);
   ctx.textBaseline = 'top';
+  ctx.restore();
+}
+
+function drawBoard(y, highlightId) {
+  ctx.save();
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const accent = themeName === 'light' ? '#a15200' : '#ffd166';
+  ctx.font = 'bold 13px Orbitron, sans-serif';
+  ctx.fillStyle = themeName === 'light' ? '#7a68a8' : '#8fa6d6';
+  ctx.fillText('\u2726  TOP 5 RUNS  \u2726', W / 2, y - 30);
+  if (!board.length) {
+    ctx.font = 'bold 14px Orbitron, sans-serif';
+    ctx.fillStyle = T().sub;
+    ctx.fillText('NO RUNS YET — SURVIVE AND SET ONE', W / 2, y + 2);
+    ctx.restore();
+    return;
+  }
+  const rowH = 30, panelW = Math.min(560, W - 60);
+  board.forEach((e, i) => {
+    const ry = y + i * rowH;
+    const hot = e.id === highlightId;
+    if (hot) {
+      ctx.fillStyle = themeName === 'light' ? 'rgba(255,175,60,0.22)' : 'rgba(255,209,102,0.14)';
+      ctx.beginPath(); ctx.roundRect(W / 2 - panelW / 2, ry - 14, panelW, 28, 9); ctx.fill();
+      ctx.strokeStyle = themeName === 'light' ? 'rgba(161,82,0,0.55)' : 'rgba(255,209,102,0.6)';
+      ctx.lineWidth = 1.2; ctx.stroke();
+    }
+    ctx.font = '900 16px Orbitron, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillStyle = hot ? accent : (i === 0 ? T().hud : T().sub);
+    ctx.fillText(String(i + 1), W / 2 - panelW / 2 + 34, ry);
+    ctx.textAlign = 'left';
+    ctx.fillStyle = hot ? accent : T().hud;
+    ctx.fillText(String(e.score).padStart(6, '0'), W / 2 - panelW / 2 + 58, ry);
+    ctx.font = 'bold 12px Orbitron, sans-serif';
+    ctx.fillStyle = hot ? accent : T().sub;
+    ctx.textAlign = 'center';
+    ctx.fillText(`${e.coins} COINS`, W / 2 + 66, ry);
+    ctx.fillText(`WAVE ${e.wave}`, W / 2 + 172, ry);
+    ctx.textAlign = 'right';
+    ctx.fillText(e.date, W / 2 + panelW / 2 - 16, ry);
+  });
   ctx.restore();
 }
 
