@@ -1,0 +1,205 @@
+{
+  "cats": [
+    {
+      "id": "mochi",
+      "name": "Mochi",
+      "breed": "Ragdoll",
+      "age": "3 yrs",
+      "emoji": "🐱",
+      "vibe": "Cuddly",
+      "rate": 14,
+      "rating": 4.9,
+      "reviews": 128,
+      "host": "Dana in Brooklyn",
+      "city": "Brooklyn, NY",
+      "tags": [
+        "Lap magnet",
+        "Quiet",
+        "Brush lover"
+      ],
+      "bio": "Mochi has never met a laptop she did not want to sit on. Perfect for focused work sessions with a soft supervisor.",
+      "gradient": "peach"
+    },
+    {
+      "id": "biscuit",
+      "name": "Biscuit",
+      "breed": "Orange Tabby",
+      "age": "2 yrs",
+      "emoji": "😺",
+      "vibe": "Playful",
+      "rate": 11,
+      "rating": 4.8,
+      "reviews": 96,
+      "host": "Marcus in Austin",
+      "city": "Austin, TX",
+      "tags": [
+        "Fetch pro",
+        "Zoomies",
+        "Food motivated"
+      ],
+      "bio": "Biscuit will chase a shoelace for hours and then fall asleep in your lap. Comes with his own toy basket.",
+      "gradient": "gold"
+    },
+    {
+      "id": "olive",
+      "name": "Olive",
+      "breed": "British Shorthair",
+      "age": "5 yrs",
+      "emoji": "😼",
+      "vibe": "Chill",
+      "rate": 16,
+      "rating": 5,
+      "reviews": 74,
+      "host": "Priya in Chicago",
+      "city": "Chicago, IL",
+      "tags": [
+        "Low energy",
+        "Window sitter",
+        "Quiet"
+      ],
+      "bio": "A professional napper. Olive is ideal for reading afternoons and long video calls where you want a calm co-star.",
+      "gradient": "sage"
+    },
+    {
+      "id": "pepper",
+      "name": "Pepper",
+      "breed": "Tuxedo",
+      "age": "1 yr",
+      "emoji": "🐈‍⬛",
+      "vibe": "Chatty",
+      "rate": 9,
+      "rating": 4.7,
+      "reviews": 61,
+      "host": "Theo in Portland",
+      "city": "Portland, OR",
+      "tags": [
+        "Talks back",
+        "Curious",
+        "Greets guests"
+      ],
+      "bio": "Pepper narrates everything. Expect commentary on your emails, your snacks, and the birds outside.",
+      "gradient": "ink"
+    },
+    {
+      "id": "clementine",
+      "name": "Clementine",
+      "breed": "Calico",
+      "age": "4 yrs",
+      "emoji": "😸",
+      "vibe": "Cuddly",
+      "rate": 13,
+      "rating": 4.9,
+      "reviews": 152,
+      "host": "Rosa in Miami",
+      "city": "Miami, FL",
+      "tags": [
+        "Headbutts",
+        "Purr machine",
+        "Sunbather"
+      ],
+      "bio": "Clementine purrs at a frequency that has been scientifically described as \"unreasonably soothing.\"",
+      "gradient": "rose"
+    },
+    {
+      "id": "noodle",
+      "name": "Noodle",
+      "breed": "Siamese",
+      "age": "6 yrs",
+      "emoji": "🐈",
+      "vibe": "Chatty",
+      "rate": 15,
+      "rating": 4.8,
+      "reviews": 88,
+      "host": "June in Seattle",
+      "city": "Seattle, WA",
+      "tags": [
+        "Very vocal",
+        "Shoulder cat",
+        "Social"
+      ],
+      "bio": "Noodle would like to be involved in whatever you are doing. Yes, including that. Especially that.",
+      "gradient": "lavender"
+    },
+    {
+      "id": "miso",
+      "name": "Miso",
+      "breed": "Scottish Fold",
+      "age": "2 yrs",
+      "emoji": "🙂",
+      "vibe": "Chill",
+      "rate": 18,
+      "rating": 4.9,
+      "reviews": 45,
+      "host": "Abe in San Francisco",
+      "city": "San Francisco, CA",
+      "tags": [
+        "Round",
+        "Zen",
+        "Sunbeam seeker"
+      ],
+      "bio": "Miso is shaped like a dumpling and moves like a cloud. A premium companion for premium lounging.",
+      "gradient": "cream"
+    },
+    {
+      "id": "juniper",
+      "name": "Juniper",
+      "breed": "Maine Coon",
+      "age": "3 yrs",
+      "emoji": "🦁",
+      "vibe": "Playful",
+      "rate": 17,
+      "rating": 4.9,
+      "reviews": 103,
+      "host": "Elena in Denver",
+      "city": "Denver, CO",
+      "tags": [
+        "Gentle giant",
+        "Puzzle solver",
+        "Fluffy"
+      ],
+      "bio": "Juniper is a large, polite lion who will politely solve a puzzle toy and then politely ask for more.",
+      "gradient": "forest"
+    }
+  ],
+  "bookings": [
+    {
+      "id": "PB-4821",
+      "catId": "mochi",
+      "catName": "Mochi",
+      "renter": "Sam",
+      "email": "sam@example.com",
+      "date": "2026-10-23",
+      "hours": 3,
+      "total": 42,
+      "note": "Working from home, needs a desk buddy.",
+      "createdAt": "2026-10-22T22:17:43.989Z"
+    },
+    {
+      "id": "PB-4818",
+      "catId": "biscuit",
+      "catName": "Biscuit",
+      "renter": "Alex",
+      "email": "alex@example.com",
+      "date": "2026-10-24",
+      "hours": 2,
+      "total": 22,
+      "note": "Movie night.",
+      "createdAt": "2026-10-22T21:29:43.989Z"
+    },
+    {
+      "id": "PB-4812",
+      "catId": "olive",
+      "catName": "Olive",
+      "renter": "Riley",
+      "email": "riley@example.com",
+      "date": "2026-10-25",
+      "hours": 5,
+      "total": 80,
+      "note": "Reading marathon.",
+      "createdAt": "2026-10-22T19:43:43.989Z"
+    }
+  ],
+  "waitlist": [],
+  "baseWaitlist": 1284,
+  "counter": 4822
+}

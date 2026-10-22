@@ -23,13 +23,15 @@ function seed() {
     { id: 'PB-4818', catId: 'biscuit', catName: 'Biscuit', renter: 'Alex', email: 'alex@example.com', date: new Date(now + 2 * 864e5).toISOString().slice(0, 10), hours: 2, total: 22, note: 'Movie night.', createdAt: new Date(now - 84 * 6e4).toISOString() },
     { id: 'PB-4812', catId: 'olive', catName: 'Olive', renter: 'Riley', email: 'riley@example.com', date: new Date(now + 3 * 864e5).toISOString().slice(0, 10), hours: 5, total: 80, note: 'Reading marathon.', createdAt: new Date(now - 190 * 6e4).toISOString() }
   ]
-  return { cats: seedCats, bookings, counter: 4822 }
+  return { cats: seedCats, bookings, waitlist: [], baseWaitlist: 1284, counter: 4822 }
 }
 
 function load() {
   try {
     const raw = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'))
     if (!Array.isArray(raw.cats) || !Array.isArray(raw.bookings)) throw new Error('bad data')
+    if (!Array.isArray(raw.waitlist)) raw.waitlist = []
+    if (!raw.baseWaitlist) raw.baseWaitlist = 1284
     return raw
   } catch {
     const fresh = seed()
@@ -90,6 +92,32 @@ function api(req, res, next) {
       rating: Math.round(avg * 10) / 10,
       cities: cities.size + 29
     })
+  }
+
+  if (req.method === 'GET' && route === '/waitlist') {
+    const counts = {}
+    for (const w of db.waitlist) counts[w.city] = (counts[w.city] || 0) + 1
+    return send(res, 200, {
+      count: db.baseWaitlist + db.waitlist.length,
+      recentCities: Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([city, n]) => ({ city, n }))
+    })
+  }
+
+  if (req.method === 'POST' && route === '/waitlist') {
+    return readBody(req).then(body => {
+      const email = clean(body.email, 120).toLowerCase()
+      const city = clean(body.city, 60)
+      if (!emailOk(email)) return send(res, 400, { error: 'Please add a valid email.' })
+      if (city.length < 2) return send(res, 400, { error: 'Which city are you in?' })
+      if (db.waitlist.some(w => w.email === email)) return send(res, 409, { error: 'You are already on the list — we will be in touch!' })
+      db.waitlist.push({ email, city, createdAt: new Date().toISOString() })
+      save(db)
+      return send(res, 201, {
+        position: db.baseWaitlist + db.waitlist.length,
+        count: db.baseWaitlist + db.waitlist.length,
+        city
+      })
+    }).catch(() => send(res, 400, { error: 'Could not join the waitlist.' }))
   }
 
   if (req.method === 'POST' && route === '/bookings') {
