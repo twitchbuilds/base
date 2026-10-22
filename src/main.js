@@ -40,6 +40,22 @@ function noiseBurst(dur = 0.3, vol = 0.15) {
   s.connect(f).connect(g).connect(ac.destination); s.start();
 }
 
+function meow(pitch = 1) {
+  const ac = audio(); if (!ac) return;
+  const t = ac.currentTime;
+  const o = ac.createOscillator(), g = ac.createGain();
+  const f = ac.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 900; f.Q.value = 2;
+  o.type = 'sawtooth';
+  o.frequency.setValueAtTime(520 * pitch, t);
+  o.frequency.exponentialRampToValueAtTime(760 * pitch, t + 0.09);
+  o.frequency.exponentialRampToValueAtTime(430 * pitch, t + 0.3);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.05, t + 0.04);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.32);
+  o.connect(f).connect(g).connect(ac.destination);
+  o.start(t); o.stop(t + 0.34);
+}
+
 // ---------- Input ----------
 const keys = {};
 window.addEventListener('keydown', e => {
@@ -56,7 +72,7 @@ window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
 const game = {
   state: 'playing', score: 0, best: +(localStorage.getItem('voidrunner_best') || 0),
   lives: 3, wave: 1, shake: 0, time: 0, paused: false,
-  spawnTimer: 0, spawnRate: 0.9, combo: 1, comboTimer: 0,
+  spawnTimer: 0, spawnRate: 1.15, combo: 1, comboTimer: 0,
   flash: 0, banner: '', bannerTimer: 0
 };
 
@@ -73,8 +89,8 @@ initStars();
 
 function reset() {
   game.state = 'playing'; game.score = 0; game.lives = 3; game.wave = 1;
-  game.shake = 0; game.spawnTimer = 0.6; game.spawnRate = 0.9; game.combo = 1; game.comboTimer = 0;
-  game.paused = false; game.banner = 'WAVE 1'; game.bannerTimer = 1.6;
+  game.shake = 0; game.spawnTimer = 0.6; game.spawnRate = 1.15; game.combo = 1; game.comboTimer = 0;
+  game.paused = false; game.banner = 'WAVE 1 — CATS INBOUND'; game.bannerTimer = 1.6;
   bullets = []; ebullets = []; enemies = []; particles = []; powerups = []; floaties = [];
   player.x = W / 2; player.y = H * 0.78; player.vx = 0; player.vy = 0;
   player.cool = 0; player.invuln = 1.5;
@@ -109,10 +125,10 @@ function fire() {
 
 // ---------- Enemies ----------
 const ENEMY_TYPES = {
-  scout: { hp: 1, r: 15, speed: 150, color: '#ff4d9d', score: 10 },
-  zig:   { hp: 2, r: 17, speed: 120, color: '#ffb347', score: 20 },
-  tank:  { hp: 4, r: 26, speed: 70,  color: '#b566ff', score: 40 },
-  rock:  { hp: 3, r: 24, speed: 90,  color: '#8899bb', score: 25 }
+  scout: { hp: 1, r: 15, speed: 105, color: '#ff4d9d', score: 10 },
+  zig:   { hp: 2, r: 17, speed: 88, color: '#ffb347', score: 20 },
+  tank:  { hp: 4, r: 26, speed: 48,  color: '#b566ff', score: 40 },
+  rock:  { hp: 3, r: 24, speed: 66,  color: '#8899bb', score: 25 }
 };
 function spawnEnemy() {
   const roll = Math.random();
@@ -122,9 +138,10 @@ function spawnEnemy() {
   if (game.wave >= 2 && roll > 0.44 && roll < 0.55) type = 'rock';
   const t = ENEMY_TYPES[type];
   const x = rand(40, W - 40);
+  if (Math.random() < 0.35) meow(rand(0.8, 1.3));
   enemies.push({
     type, x, y: -40, hp: t.hp + Math.floor(game.wave / 4), maxhp: t.hp + Math.floor(game.wave / 4),
-    r: t.r, speed: t.speed + game.wave * 6, color: t.color, score: t.score,
+    r: t.r, speed: t.speed + game.wave * 3.5, color: t.color, score: t.score,
     t: rand(0, 10), baseX: x, shootTimer: rand(1.2, 2.6), hitFlash: 0, rot: 0
   });
 }
@@ -137,6 +154,8 @@ function damageEnemy(e, dmg, bx, by) {
     const pts = Math.round(e.score * game.combo);
     game.score += pts;
     floatText(e.x, e.y, '+' + pts, e.color);
+    if (Math.random() < 0.35) floatText(e.x, e.y - 22, 'MEOW!', '#ffd166');
+    meow(rand(1.1, 1.6));
     burst(e.x, e.y, e.color, 26, 300, 0.8);
     game.shake = Math.min(14, game.shake + 5);
     noiseBurst(0.35, 0.1);
@@ -160,12 +179,12 @@ function update(dt) {
   if (game.bannerTimer > 0) game.bannerTimer -= dt;
 
   // player movement
-  const acc = 2400, drag = Math.pow(0.0008, dt);
+  const acc = 2000, drag = Math.pow(0.0008, dt);
   let ix = (keys['arrowright'] || keys['d'] ? 1 : 0) - (keys['arrowleft'] || keys['a'] ? 1 : 0);
   let iy = (keys['arrowdown'] || keys['s'] ? 1 : 0) - (keys['arrowup'] || keys['w'] ? 1 : 0);
   player.vx += ix * acc * dt; player.vy += iy * acc * dt;
   player.vx *= drag; player.vy *= drag;
-  const maxv = 560;
+  const maxv = 470;
   const sp = Math.hypot(player.vx, player.vy);
   if (sp > maxv) { player.vx = player.vx / sp * maxv; player.vy = player.vy / sp * maxv; }
   player.x += player.vx * dt; player.y += player.vy * dt;
@@ -192,12 +211,12 @@ function update(dt) {
   game.spawnTimer -= dt;
   if (game.spawnTimer <= 0) {
     spawnEnemy();
-    game.spawnTimer = Math.max(0.22, game.spawnRate - game.wave * 0.05) * rand(0.7, 1.3);
+    game.spawnTimer = Math.max(0.4, game.spawnRate - game.wave * 0.04) * rand(0.7, 1.3);
   }
   const newWave = 1 + Math.floor(game.score / 500);
   if (newWave > game.wave) {
     game.wave = newWave;
-    game.banner = 'WAVE ' + game.wave; game.bannerTimer = 1.8;
+    game.banner = 'WAVE ' + game.wave + ' — MORE CATS'; game.bannerTimer = 1.8;
     blip(220, 0.25, 'sawtooth', 0.06, 260); blip(440, 0.35, 'sine', 0.05, 220);
   }
 
@@ -221,7 +240,7 @@ function update(dt) {
       if (e.shootTimer <= 0 && e.y > 0 && e.y < H * 0.7) {
         e.shootTimer = rand(1.3, 2.2);
         const a = Math.atan2(player.y - e.y, player.x - e.x);
-        for (let k = -1; k <= 1; k++) ebullets.push({ x: e.x, y: e.y, vx: Math.cos(a + k * 0.22) * 260, vy: Math.sin(a + k * 0.22) * 260, r: 5, life: 4, color: '#c98bff' });
+        for (let k = -1; k <= 1; k++) ebullets.push({ x: e.x, y: e.y, vx: Math.cos(a + k * 0.22) * 200, vy: Math.sin(a + k * 0.22) * 200, r: 5, life: 4, color: '#c98bff' });
         blip(180, 0.12, 'sawtooth', 0.03, -60);
       }
     } else {
@@ -328,45 +347,115 @@ function drawShip(x, y, angle, invuln) {
 }
 
 function drawEnemy(e) {
+  const r = e.r;
+  const fur = e.hitFlash > 0 ? '#ffffff' : e.color;
+  const dark = e.hitFlash > 0 ? '#ffffff' : 'rgba(10,4,24,0.55)';
   ctx.save();
-  ctx.translate(e.x, e.y); ctx.rotate(e.rot * (e.type === 'rock' ? 1 : 0.15));
-  ctx.shadowColor = e.color; ctx.shadowBlur = 16;
-  ctx.fillStyle = e.hitFlash > 0 ? '#ffffff' : e.color;
-  if (e.type === 'rock') {
+  ctx.translate(e.x, e.y + Math.sin(e.t * 3 + e.x) * 2);
+  ctx.rotate(e.type === 'rock' ? Math.sin(e.t) * 0.25 : e.rot * 0.06 + Math.sin(e.t * 1.4) * 0.08);
+  ctx.shadowColor = e.color; ctx.shadowBlur = 18;
+
+  // ears
+  ctx.fillStyle = fur;
+  for (const sgn of [-1, 1]) {
     ctx.beginPath();
-    const n = 8;
-    for (let i = 0; i < n; i++) {
-      const a = i / n * Math.PI * 2, rr = e.r * (0.75 + 0.3 * Math.sin(i * 2.7 + 1));
-      i ? ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr) : ctx.moveTo(Math.cos(a) * rr, Math.sin(a) * rr);
+    ctx.moveTo(sgn * r * 0.75, -r * 0.45);
+    ctx.lineTo(sgn * r * 0.5, -r * 1.28);
+    ctx.lineTo(sgn * r * 0.08, -r * 0.72);
+    ctx.closePath(); ctx.fill();
+  }
+  // fluffy tank cheeks
+  if (e.type === 'tank') {
+    for (const sgn of [-1, 1]) {
+      ctx.beginPath(); ctx.arc(sgn * r * 0.78, r * 0.18, r * 0.42, 0, 7); ctx.fill();
     }
-    ctx.closePath(); ctx.fill();
-    ctx.fillStyle = 'rgba(0,0,0,0.3)';
-    ctx.beginPath(); ctx.arc(-e.r * 0.25, -e.r * 0.2, e.r * 0.3, 0, 7); ctx.fill();
-    ctx.beginPath(); ctx.arc(e.r * 0.3, e.r * 0.25, e.r * 0.18, 0, 7); ctx.fill();
-  } else if (e.type === 'tank') {
+  }
+  // head
+  ctx.beginPath(); ctx.ellipse(0, 0, r, r * 0.92, 0, 0, 7); ctx.fill();
+  ctx.shadowBlur = 0;
+
+  // inner ears
+  ctx.fillStyle = e.hitFlash > 0 ? '#ffffff' : 'rgba(255,180,215,0.9)';
+  for (const sgn of [-1, 1]) {
     ctx.beginPath();
-    ctx.moveTo(0, e.r); ctx.lineTo(e.r, e.r * 0.2); ctx.lineTo(e.r * 0.6, -e.r);
-    ctx.lineTo(-e.r * 0.6, -e.r); ctx.lineTo(-e.r, e.r * 0.2);
+    ctx.moveTo(sgn * r * 0.62, -r * 0.52);
+    ctx.lineTo(sgn * r * 0.48, -r * 1.05);
+    ctx.lineTo(sgn * r * 0.22, -r * 0.7);
     ctx.closePath(); ctx.fill();
-    ctx.fillStyle = '#2b0f45';
-    ctx.beginPath(); ctx.arc(0, 0, e.r * 0.38, 0, 7); ctx.fill();
-    ctx.fillStyle = '#ff4d6d';
-    ctx.beginPath(); ctx.arc(0, 0, e.r * 0.18, 0, 7); ctx.fill();
-  } else {
-    ctx.beginPath();
-    ctx.moveTo(0, e.r); ctx.lineTo(e.r, -e.r * 0.5); ctx.lineTo(e.r * 0.35, -e.r * 0.15);
-    ctx.lineTo(0, -e.r); ctx.lineTo(-e.r * 0.35, -e.r * 0.15); ctx.lineTo(-e.r, -e.r * 0.5);
-    ctx.closePath(); ctx.fill();
-    ctx.fillStyle = 'rgba(255,255,255,0.75)';
-    ctx.beginPath(); ctx.arc(0, e.r * 0.25, e.r * 0.2, 0, 7); ctx.fill();
+  }
+
+  // tabby stripes
+  if (e.type === 'zig' || e.type === 'rock') {
+    ctx.strokeStyle = e.hitFlash > 0 ? '#ffffff' : 'rgba(0,0,0,0.22)';
+    ctx.lineWidth = Math.max(2, r * 0.11); ctx.lineCap = 'round';
+    for (let i = -1; i <= 1; i++) {
+      ctx.beginPath();
+      ctx.moveTo(i * r * 0.38, -r * 0.72);
+      ctx.lineTo(i * r * 0.38, -r * 0.44);
+      ctx.stroke();
+    }
+  }
+  // tank forehead patch
+  if (e.type === 'tank') {
+    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+    ctx.beginPath(); ctx.ellipse(0, -r * 0.45, r * 0.34, r * 0.16, 0, 0, 7); ctx.fill();
+  }
+
+  // eyes (blink)
+  const blink = (Math.sin(e.t * 1.7 + e.x * 0.05) > 0.97);
+  for (const sgn of [-1, 1]) {
+    if (blink) {
+      ctx.strokeStyle = dark; ctx.lineWidth = Math.max(2, r * 0.12);
+      ctx.beginPath(); ctx.moveTo(sgn * r * 0.45, -r * 0.14); ctx.lineTo(sgn * r * 0.18, -r * 0.14); ctx.stroke();
+    } else {
+      ctx.fillStyle = e.hitFlash > 0 ? '#ffffff' : '#eaffff';
+      ctx.beginPath(); ctx.ellipse(sgn * r * 0.32, -r * 0.12, r * 0.21, r * 0.24, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = e.hitFlash > 0 ? '#ffffff' : '#0b0620';
+      ctx.beginPath(); ctx.ellipse(sgn * r * 0.32 + Math.sin(e.t * 2) * r * 0.04, -r * 0.1, r * 0.07, r * 0.19, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.beginPath(); ctx.arc(sgn * r * 0.25, -r * 0.22, r * 0.06, 0, 7); ctx.fill();
+    }
+  }
+
+  // nose + mouth
+  ctx.fillStyle = '#ff7fa8';
+  ctx.beginPath();
+  ctx.moveTo(0, r * 0.2); ctx.lineTo(-r * 0.13, r * 0.08); ctx.lineTo(r * 0.13, r * 0.08);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = dark; ctx.lineWidth = Math.max(1.5, r * 0.06);
+  ctx.beginPath();
+  ctx.moveTo(0, r * 0.22);
+  ctx.quadraticCurveTo(-r * 0.1, r * 0.4, -r * 0.22, r * 0.3);
+  ctx.moveTo(0, r * 0.22);
+  ctx.quadraticCurveTo(r * 0.1, r * 0.4, r * 0.22, r * 0.3);
+  ctx.stroke();
+
+  // whiskers
+  ctx.strokeStyle = e.hitFlash > 0 ? '#ffffff' : 'rgba(230,240,255,0.8)';
+  ctx.lineWidth = 1.4;
+  for (const sgn of [-1, 1]) {
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath();
+      ctx.moveTo(sgn * r * 0.55, r * 0.06 + i * r * 0.09);
+      ctx.lineTo(sgn * r * 1.3, r * (0.0 + i * 0.14) - r * 0.04);
+      ctx.stroke();
+    }
+  }
+
+  // pink collar for the big cats
+  if (e.type === 'tank') {
+    ctx.strokeStyle = '#ff4d9d'; ctx.lineWidth = Math.max(3, r * 0.14);
+    ctx.beginPath(); ctx.arc(0, r * 0.5, r * 0.6, 0.15 * Math.PI, 0.85 * Math.PI); ctx.stroke();
+    ctx.fillStyle = '#ffd166';
+    ctx.beginPath(); ctx.arc(0, r * 0.5 + r * 0.58, r * 0.12, 0, 7); ctx.fill();
   }
   ctx.restore();
-  // hp bar for tanks
+
   if (e.maxhp > 2 && e.hp < e.maxhp) {
     ctx.fillStyle = 'rgba(0,0,0,0.5)';
-    ctx.fillRect(e.x - 22, e.y - e.r - 12, 44, 4);
+    ctx.fillRect(e.x - 22, e.y - e.r - 16, 44, 4);
     ctx.fillStyle = '#7dffb0';
-    ctx.fillRect(e.x - 22, e.y - e.r - 12, 44 * (e.hp / e.maxhp), 4);
+    ctx.fillRect(e.x - 22, e.y - e.r - 16, 44 * (e.hp / e.maxhp), 4);
   }
 }
 
