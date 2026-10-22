@@ -109,11 +109,12 @@ const game = {
   state: 'playing', score: 0, best: +(localStorage.getItem('voidrunner_best') || 0),
   lives: 3, wave: 1, shake: 0, time: 0, paused: false,
   spawnTimer: 0, spawnRate: 1.15, combo: 1, comboTimer: 0,
-  flash: 0, banner: '', bannerTimer: 0, boss: null, bossWavesDone: []
+  flash: 0, banner: '', bannerTimer: 0, boss: null, bossWavesDone: [],
+  coins: 0, coinStreak: 0, coinTimer: 0
 };
 
 const player = { x: 0, y: 0, vx: 0, vy: 0, r: 15, cool: 0, invuln: 0, thrust: 0, angle: 0 };
-let bullets = [], ebullets = [], enemies = [], particles = [], stars = [], powerups = [], floaties = [];
+let bullets = [], ebullets = [], enemies = [], particles = [], stars = [], powerups = [], floaties = [], coins = [];
 
 function initStars() {
   stars = [];
@@ -127,7 +128,8 @@ function reset() {
   game.state = 'playing'; game.score = 0; game.lives = 3; game.wave = 1;
   game.shake = 0; game.spawnTimer = 0.6; game.spawnRate = 1.15; game.combo = 1; game.comboTimer = 0;
   game.paused = false; game.boss = null; game.bossWavesDone = []; game.banner = 'WAVE 1 — CATS INBOUND'; game.bannerTimer = 1.6;
-  bullets = []; ebullets = []; enemies = []; particles = []; powerups = []; floaties = [];
+  game.coins = 0; game.coinStreak = 0; game.coinTimer = 0;
+  bullets = []; ebullets = []; enemies = []; particles = []; powerups = []; floaties = []; coins = [];
   player.x = W / 2; player.y = H * 0.78; player.vx = 0; player.vy = 0;
   player.cool = 0; player.invuln = 1.5;
   initStars();
@@ -140,6 +142,12 @@ function burst(x, y, color, n = 18, speed = 220, life = 0.7) {
   for (let i = 0; i < n; i++) {
     const a = Math.random() * Math.PI * 2, sp = rand(speed * 0.2, speed);
     particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: rand(life * 0.4, life), max: life, color, r: rand(1, 3.2) });
+  }
+}
+function dropCoins(x, y, n = 1, power = 120) {
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2, sp = rand(power * 0.4, power);
+    coins.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60, r: 10, t: rand(0, 6) });
   }
 }
 function floatText(x, y, text, color) {
@@ -196,6 +204,7 @@ function damageEnemy(e, dmg, bx, by) {
     game.shake = Math.min(14, game.shake + 5);
     noiseBurst(0.35, 0.1);
     game.combo = Math.min(5, game.combo + 0.25); game.comboTimer = 2.5;
+    dropCoins(e.x, e.y, e.type === 'tank' ? 4 : e.type === 'rock' ? 2 : 1, e.type === 'scout' ? 90 : 150);
     if (Math.random() < 0.09 + (e.type === 'tank' ? 0.15 : 0)) {
       powerups.push({ x: e.x, y: e.y, vy: 70, r: 12, kind: Math.random() < 0.5 ? 'rapid' : 'shield', t: 0 });
     }
@@ -228,6 +237,7 @@ function damageBoss(b, bx, by) {
     game.banner = 'CAT QUEEN DOWN!'; game.bannerTimer = 2.2;
     game.bossWavesDone.push(game.wave);
     for (let i = 0; i < 2; i++) powerups.push({ x: b.x + rand(-60, 60), y: b.y, vy: 60, r: 12, kind: i ? 'shield' : 'rapid', t: 0 });
+    for (let i = 0; i < 16; i++) dropCoins(b.x + rand(-40, 40), b.y + rand(-30, 30), 1, 380);
     game.boss = null;
   }
 }
@@ -388,6 +398,35 @@ function update(dt) {
       b.dead = true; hurtPlayer();
     }
   }
+
+  // coins — drift, magnet, collect
+  if (game.coinTimer > 0) { game.coinTimer -= dt; if (game.coinTimer <= 0) game.coinStreak = 0; }
+  for (const c of coins) {
+    c.t += dt;
+    const dx = player.x - c.x, dy = player.y - c.y, d = Math.hypot(dx, dy) || 1;
+    if (d < 200) {
+      const pull = (1 - d / 200) * 2600 + 260;
+      c.vx += (dx / d) * pull * dt; c.vy += (dy / d) * pull * dt;
+    } else {
+      c.vy += 110 * dt;
+    }
+    c.vx *= Math.pow(0.5, dt); c.vy *= Math.pow(0.5, dt);
+    c.x += c.vx * dt; c.y += c.vy * dt;
+    if (c.y > H + 30) c.dead = true;
+    if (d < player.r + c.r + 8) {
+      c.dead = true;
+      game.coins++;
+      game.score += 25;
+      game.coinStreak++; game.coinTimer = 0.7;
+      const pitch = 760 + Math.min(game.coinStreak, 20) * 42;
+      blip(pitch, 0.06, 'square', 0.035, 180);
+      blip(pitch * 1.5, 0.09, 'sine', 0.03, 120);
+      floatText(c.x, c.y - 4, '+25', '#ffd166');
+      burst(c.x, c.y, '#ffd166', 7, 150, 0.45);
+      if (Math.random() < 0.5) burst(c.x, c.y, '#fff3b0', 3, 90, 0.3);
+    }
+  }
+  coins = coins.filter(c => !c.dead);
 
   // powerups
   for (const p of powerups) {
@@ -603,6 +642,29 @@ function render() {
   }
   ctx.globalAlpha = 1;
 
+  // coins
+  for (const c of coins) {
+    const sx = Math.max(0.16, Math.abs(Math.cos(c.t * 5)));
+    const bob = Math.sin(c.t * 4) * 1.6;
+    ctx.save(); ctx.translate(c.x, c.y + bob);
+    ctx.globalAlpha = 0.22;
+    ctx.fillStyle = '#ffd166';
+    ctx.beginPath(); ctx.arc(0, 0, 16, 0, 7); ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.scale(sx, 1);
+    ctx.shadowColor = '#ffb800'; ctx.shadowBlur = 16;
+    const g = ctx.createRadialGradient(-3, -3, 1, 0, 0, 10);
+    g.addColorStop(0, '#fff6c0'); g.addColorStop(0.55, '#ffd166'); g.addColorStop(1, '#e09a00');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(0, 0, 9, 0, 7); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = 'rgba(140,84,0,0.75)'; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.arc(0, 0, 6.4, 0, 7); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.beginPath(); ctx.arc(-2.6, -3, 2.1, 0, 7); ctx.fill();
+    ctx.restore();
+  }
+
   // powerups
   for (const p of powerups) {
     const bob = Math.sin(p.t * 6) * 2;
@@ -699,6 +761,25 @@ function drawHUD() {
   ctx.fillStyle = T().sub;
   ctx.fillText('SCORE', 24, 54);
   ctx.fillText(`BEST ${game.best}`, 24, 74);
+
+  // coin wallet
+  ctx.save();
+  ctx.translate(33, 108);
+  ctx.shadowColor = '#ffb800'; ctx.shadowBlur = 12;
+  const cg = ctx.createRadialGradient(-2, -2, 1, 0, 0, 9);
+  cg.addColorStop(0, '#fff6c0'); cg.addColorStop(0.6, '#ffd166'); cg.addColorStop(1, '#d89300');
+  ctx.fillStyle = cg; ctx.beginPath(); ctx.arc(0, 0, 9, 0, 7); ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = 'rgba(140,84,0,0.8)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(0, 0, 6.2, 0, 7); ctx.stroke();
+  ctx.restore();
+  ctx.font = '900 20px Orbitron, sans-serif';
+  ctx.fillStyle = '#ffd166'; ctx.shadowColor = '#ffb800'; ctx.shadowBlur = 10;
+  ctx.fillText(`${game.coins}`, 50, 98);
+  ctx.shadowBlur = 0;
+  ctx.font = 'bold 12px Orbitron, sans-serif';
+  ctx.fillStyle = T().sub;
+  ctx.fillText('COINS', 50, 122);
 
   // lives
   for (let i = 0; i < 3; i++) {
