@@ -21,7 +21,8 @@ Every commit is one chat prompt, credited to the viewer who suggested it.
 
 | Round | Feature | Prompted by | Votes | Commit |
 | --- | --- | --- | --- | --- |
-| 3 | all enemies are cats | @NeonNinja | 6 |  |
+| 4 | add speed powerups | @midnightmango | 4 |  |
+| 3 | all enemies are cats | @NeonNinja | 6 | [`753a9c1`](https://github.com/twitchbuilds/base/commit/753a9c164b2bbbaa905127f2638dfac8c830e1ee) |
 | 2 | a high score leaderboard | @quietkeyboard | 6 | [`cc3bfd5`](https://github.com/twitchbuilds/base/commit/cc3bfd5e3ea83c44afd622995b85b01e7001f006) |
 | 1 | collectible coins | @ChonkyCat | 3 | [`4ef46e9`](https://github.com/twitchbuilds/base/commit/4ef46e904defc6c2bca3e474206fa3352f79771f) |
 
@@ -30,8 +31,8 @@ Every commit is one chat prompt, credited to the viewer who suggested it.
 1. **quietkeyboard**: 15 pts
 2. **ChonkyCat**: 12 pts
 3. **NeonNinja**: 12 pts
-4. **sir_reload**: 5 pts
-5. **Glitchy**: 4 pts
+4. **midnightmango**: 10 pts
+5. **lagspike**: 6 pts
 
 ---
 Run it yourself: `npm install && npm run dev`. Built with [Twitch Builds](https://github.com/twitchbuilds).

@@ -806,10 +806,10 @@ function render() {
 function drawHUD() {
   ctx.save();
   ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-  ctx.font = '900 30px Orbitron, sans-serif';
+  ctx.font = '900 36px Orbitron, sans-serif';
   ctx.fillStyle = T().hud;
   ctx.shadowColor = T().hudGlow; ctx.shadowBlur = 16;
-  ctx.fillText(String(game.score).padStart(6, '0'), 22, 18);
+  ctx.fillText(String(game.score).padStart(6, '0'), 22, 16);
   ctx.shadowBlur = 0;
   ctx.font = 'bold 12px Orbitron, sans-serif';
   ctx.fillStyle = T().sub;
@@ -901,9 +901,9 @@ function drawBoard(y, highlightId) {
   ctx.save();
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   const accent = themeName === 'light' ? '#a15200' : '#ffd166';
-  ctx.font = 'bold 13px Orbitron, sans-serif';
+  ctx.font = 'bold 16px Orbitron, sans-serif';
   ctx.fillStyle = themeName === 'light' ? '#7a68a8' : '#8fa6d6';
-  ctx.fillText('\u2726  TOP 5 RUNS  \u2726', W / 2, y - 30);
+  ctx.fillText('\u2726  TOP 5 RUNS  \u2726', W / 2, y - 34);
   if (!board.length) {
     ctx.font = 'bold 14px Orbitron, sans-serif';
     ctx.fillStyle = T().sub;
@@ -911,7 +911,7 @@ function drawBoard(y, highlightId) {
     ctx.restore();
     return;
   }
-  const rowH = 30, panelW = Math.min(560, W - 60);
+  const rowH = 34, panelW = Math.min(560, W - 60);
   board.forEach((e, i) => {
     const ry = y + i * rowH;
     const hot = e.id === highlightId;
@@ -921,14 +921,14 @@ function drawBoard(y, highlightId) {
       ctx.strokeStyle = themeName === 'light' ? 'rgba(161,82,0,0.55)' : 'rgba(255,209,102,0.6)';
       ctx.lineWidth = 1.2; ctx.stroke();
     }
-    ctx.font = '900 16px Orbitron, sans-serif';
+    ctx.font = '900 19px Orbitron, sans-serif';
     ctx.textAlign = 'right';
     ctx.fillStyle = hot ? accent : (i === 0 ? T().hud : T().sub);
     ctx.fillText(String(i + 1), W / 2 - panelW / 2 + 34, ry);
     ctx.textAlign = 'left';
     ctx.fillStyle = hot ? accent : T().hud;
     ctx.fillText(String(e.score).padStart(6, '0'), W / 2 - panelW / 2 + 58, ry);
-    ctx.font = 'bold 12px Orbitron, sans-serif';
+    ctx.font = 'bold 14px Orbitron, sans-serif';
     ctx.fillStyle = hot ? accent : T().sub;
     ctx.textAlign = 'center';
     ctx.fillText(`${e.coins} COINS`, W / 2 + 66, ry);
@@ -943,17 +943,18 @@ function overlay(title, sub, extra) {
   ctx.fillStyle = T().overlay;
   ctx.fillRect(0, 0, W, H);
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.font = '900 62px Orbitron, sans-serif';
+  ctx.font = '900 72px Orbitron, sans-serif';
   ctx.shadowColor = '#ff4d9d'; ctx.shadowBlur = 34;
   ctx.fillStyle = T().overlayText;
   ctx.fillText(title, W / 2, H * 0.42);
   ctx.shadowBlur = 0;
-  ctx.font = 'bold 18px Orbitron, sans-serif';
+  ctx.font = 'bold 22px Orbitron, sans-serif';
   ctx.fillStyle = T().sub;
-  if (extra) ctx.fillText(extra, W / 2, H * 0.52);
+  if (extra) ctx.fillText(extra, W / 2, H * 0.53);
   ctx.fillStyle = T().hudGlow === '#ffffff' ? '#ff4d9d' : '#7df9ff';
   const pulse = 0.65 + 0.35 * Math.sin(performance.now() / 260);
   ctx.globalAlpha = pulse;
+  ctx.font = 'bold 21px Orbitron, sans-serif';
   ctx.fillText(sub, W / 2, H * 0.6);
   ctx.globalAlpha = 1;
 }
